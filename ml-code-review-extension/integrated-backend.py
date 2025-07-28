@@ -361,6 +361,72 @@ def upload_file():
         print(f"Error in upload endpoint: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/notebook-analysis', methods=['POST'])
+def notebook_analysis():
+    """Handle live notebook analysis from VS Code extension"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        analysis = data.get('analysis', {})
+        cell_data = data.get('cellData', [])
+        
+        print(f"Received notebook analysis:")
+        print(f"- Total cells: {analysis.get('totalCells', 0)}")
+        print(f"- Variables: {len(analysis.get('variables', []))}")
+        print(f"- Plots: {len(analysis.get('plots', []))}")
+        print(f"- Errors: {len(analysis.get('errors', []))}")
+        
+        # Generate AI insights about the notebook state
+        insight_prompt = f"""
+        Analyze this live Jupyter notebook state and provide insights:
+        
+        Notebook Statistics:
+        - Total cells: {analysis.get('totalCells', 0)}
+        - Code cells: {analysis.get('codeCells', 0)}
+        - Executed cells: {analysis.get('executedCells', 0)}
+        
+        Variables detected: {len(analysis.get('variables', []))}
+        {chr(10).join([f"- {var['name']} ({var['type']}) in cell {var['cellIndex']}" for var in analysis.get('variables', [])[:5]])}
+        
+        Visualizations: {len(analysis.get('plots', []))} plots generated
+        
+        Errors: {len(analysis.get('errors', []))} detected
+        {chr(10).join([f"- {error[:100]}" for error in analysis.get('errors', [])[:3]])}
+        
+        Please provide:
+        1. Overall assessment of notebook quality
+        2. Suggestions for improvement
+        3. Potential issues or concerns
+        4. Next steps recommendations
+        """
+        
+        insights = ""
+        if nvidia_agent:
+            try:
+                insights = nvidia_agent.chat(
+                    message=insight_prompt,
+                    model="meta/llama-3.1-8b-instruct",
+                    max_tokens=512,
+                    temperature=0.7
+                )
+            except Exception as e:
+                print(f"Error generating insights: {e}")
+                insights = "Unable to generate AI insights at this time."
+        
+        return jsonify({
+            "success": True,
+            "insights": insights,
+            "analysis": f"Processed {analysis.get('totalCells', 0)} cells with {len(analysis.get('variables', []))} variables and {len(analysis.get('plots', []))} visualizations.",
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        print(f"Error in notebook analysis endpoint: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
