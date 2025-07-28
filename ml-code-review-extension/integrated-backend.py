@@ -278,20 +278,24 @@ def upload_file():
             # Handle Jupyter notebook
             try:
                 notebook_data = json.loads(file_data.decode('utf-8'))
-                code_cells = []
-                for cell in notebook_data.get('cells', []):
-                    if cell.get('cell_type') == 'code':
-                        code_cells.append(''.join(cell.get('source', [])))
                 
-                code_content = '\n\n'.join(code_cells)
-                
-                # Get analysis
+                # Get analysis with full notebook context
                 analysis_prompt = f"""
-                Analyze this Jupyter notebook code and provide insights:
+                Analyze this complete Jupyter notebook and provide comprehensive insights:
                 
-                {code_content}
+                FULL NOTEBOOK DATA:
+                {json.dumps(notebook_data, indent=2)}
                 
-                Provide analysis in JSON format with code quality, ML best practices, and performance scores.
+                Please analyze:
+                1. Code quality across all cells
+                2. Cell execution order and dependencies
+                3. Markdown documentation quality
+                4. Output analysis and visualizations
+                5. Data flow and variable usage
+                6. ML best practices implementation
+                7. Performance considerations
+                
+                Provide detailed analysis in JSON format with scores and specific recommendations.
                 """
                 
                 if nvidia_agent:
@@ -302,13 +306,19 @@ def upload_file():
                         temperature=0.7
                     )
                 else:
-                    response = "Mock analysis: Notebook contains code cells that need review."
+                    response = "Mock analysis: Complete notebook analyzed including all cells, outputs, and metadata."
+                
+                # Count different cell types
+                code_cells = sum(1 for cell in notebook_data.get('cells', []) if cell.get('cell_type') == 'code')
+                markdown_cells = sum(1 for cell in notebook_data.get('cells', []) if cell.get('cell_type') == 'markdown')
                 
                 return jsonify({
                     "success": True,
                     "file_path": file_path,
                     "analysis": response,
-                    "code_cells": len(code_cells),
+                    "total_cells": len(notebook_data.get('cells', [])),
+                    "code_cells": code_cells,
+                    "markdown_cells": markdown_cells,
                     "timestamp": datetime.now().isoformat()
                 })
                 
@@ -366,7 +376,7 @@ def notebook_analysis():
     """Handle live notebook analysis from VS Code extension"""
     try:
         data = request.get_json()
-        
+        print(f"Received notebook analysis request: {data}")
         if not data:
             return jsonify({"error": "No data provided"}), 400
         
