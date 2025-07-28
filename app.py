@@ -12,6 +12,7 @@ app = Flask(__name__)
 agent = NvidiaLlamaAgent(API_KEY)
 
 cuurent_session = []
+agent.set_notebook("iris_logistic_regression.ipynb")
 agent.analyze_notebook()
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -33,9 +34,13 @@ def chat():
     else:
         return jsonify({"error": "Failed to get a response"}), 500
 
-@app.route("/summary", methods=["GET"])
-def getSummary():
-    
+@app.route("/analyze", methods=["GET"])
+def getAnalysis():
+    result = agent.analyze_notebook()
+    if result:
+        return jsonify({"analysis": result})
+    else:
+        return jsonify({"error": "Failed to analyze notebook"}), 500
     return
 
 @app.route("/notebook", methods=["POST"])

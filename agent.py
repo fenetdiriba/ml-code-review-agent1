@@ -29,6 +29,7 @@ class NvidiaLlamaAgent:
             "Content-Type": "application/json"
         }
         self.current_notebook = None
+        self.message_history = []
         
     def set_notebook(self, notebook: str):
         """
@@ -38,6 +39,7 @@ class NvidiaLlamaAgent:
             notebook (str): Path to the notebook file.
         """
         self.current_notebook = notebook
+
     def analyze_notebook(self) -> Optional[str]:
         """
         Analyze the current notebook and return insights.
@@ -51,8 +53,9 @@ class NvidiaLlamaAgent:
         import nbformat
 
         # Load the notebook
-        with open("iris_logistic_regression.ipynb", "r", encoding="utf-8") as f:
+        with open(self.current_notebook, "r", encoding="utf-8") as f:
             nb = nbformat.read(f, as_version=4)
+
         cells = []
 
         # Access notebook cells
@@ -61,11 +64,13 @@ class NvidiaLlamaAgent:
                 cells.append(cell)
             elif cell.cell_type == "markdown":
                 cells.append(cell)
-        print(self.chat("Analyze the following notebook and provide insights: " + str(cells)))
+        chat_result = self.chat("Analyze the following notebook and provide insights: " + str(cells))
+        print(chat_result)
+        message_history.append({"role": "assistant", "content": chat_result})
         # Placeholder for actual analysis logic
         # This could involve reading the notebook file, extracting code cells, etc.
         # For now, we just return a dummy response
-        return f"Analyzing notebook: {self.current_notebook}"
+        return chat_result
 
     def chat(self,
              message: str,
