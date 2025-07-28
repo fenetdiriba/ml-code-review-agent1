@@ -66,7 +66,7 @@ class NvidiaLlamaAgent:
                 cells.append(cell)
         chat_result = self.chat("Analyze the following notebook and provide insights: " + str(cells))
         print(chat_result)
-        message_history.append({"role": "assistant", "content": chat_result})
+        self.message_history.append({"role": "assistant", "content": chat_result})
         # Placeholder for actual analysis logic
         # This could involve reading the notebook file, extracting code cells, etc.
         # For now, we just return a dummy response

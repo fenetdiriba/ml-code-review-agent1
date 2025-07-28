@@ -1,0 +1,33 @@
+{
+  "id": "20250727_194129_ML_Model_Comparison",
+  "name": "ML Model Comparison",
+  "description": "Comparing different classification algorithms",
+  "tags": [
+    "classification",
+    "comparison",
+    "ml"
+  ],
+  "created": "2025-07-27T19:41:29.329047",
+  "status": "active",
+  "base_notebook": null,
+  "notebooks": [
+    {
+      "original_path": "my_experiments/20250727_194129_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+      "saved_path": "my_experiments/20250727_194129_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+      "version_name": "initial",
+      "saved_at": "2025-07-27T19:41:29.345340",
+      "notes": "Initial notebook setup with templates",
+      "file_size": 2798,
+      "analysis_performed": true,
+      "analysis_path": "my_experiments/20250727_194129_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+    }
+  ],
+  "analysis_results": [
+    {
+      "notebook_version": "initial",
+      "analysis_path": "my_experiments/20250727_194129_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+      "generated_at": "2025-07-27T19:41:38.048681"
+    }
+  ],
+  "notes": []
+}

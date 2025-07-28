@@ -8,7 +8,7 @@ def index():
     # Show the upload form
     return render_template('upload.html')
 
-@app.route('notebook', methods=['POST'])
+@app.route('/notebook', methods=['POST'])
 def upload_notebook():
     # 1. Get the uploaded file
     file = request.files.get('notebook')
@@ -40,4 +40,4 @@ def upload_notebook():
 
 if __name__ == '__main__':
     # For local testing; remove debug=True in production
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

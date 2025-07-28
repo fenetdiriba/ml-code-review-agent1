@@ -1,0 +1,1327 @@
+{
+  "experiments": {
+    "20250727_194129_ML_Model_Comparison": {
+      "id": "20250727_194129_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:41:29.329047",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "my_experiments/20250727_194129_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_194129_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:41:29.345340",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194129_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194129_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:41:38.048681"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_194433_ML_Model_Comparison": {
+      "id": "20250727_194433_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:44:33.396057",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "my_experiments/20250727_194433_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_194433_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:44:33.410734",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194433_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_194433_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:44:42.095795",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194433_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194433_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:44:42.093817"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194433_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:44:52.367173"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_194739_ML_Model_Comparison": {
+      "id": "20250727_194739_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:47:39.295115",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "my_experiments/20250727_194739_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_194739_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:47:39.312113",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194739_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_194739_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:47:47.859013",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194739_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194739_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:47:47.856527"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194739_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:47:58.231876"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_194758_ML_Model_Comparison": {
+      "id": "20250727_194758_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:47:58.512196",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "my_experiments/20250727_194758_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_194758_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:47:58.528924",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194758_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_194758_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:48:07.371039",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_194758_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194758_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:48:07.368991"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_194758_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:48:17.705300"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_194844_ML_Model_Comparison": {
+      "id": "20250727_194844_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:48:44.424377",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [],
+      "analysis_results": [],
+      "notes": []
+    },
+    "20250727_195043_ML_Model_Comparison": {
+      "id": "20250727_195043_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:50:43.242606",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [],
+      "analysis_results": [],
+      "notes": []
+    },
+    "20250727_195058_ML_Model_Comparison": {
+      "id": "20250727_195058_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:50:58.509395",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [],
+      "analysis_results": [],
+      "notes": []
+    },
+    "20250727_195119_ML_Model_Comparison": {
+      "id": "20250727_195119_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:51:19.763481",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195119_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:51:19.780200",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_195119_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_195119_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:51:32.853495",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_195119_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:51:41.400754",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_195119_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:51:51.725879",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T19:51:32.851445"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:51:41.396999"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:51:51.722995"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195119_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T19:52:04.637800"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_195205_ML_Model_Comparison": {
+      "id": "20250727_195205_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:52:05.008611",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195205_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:52:05.028361",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_195205_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_195205_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:52:18.070609",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_195205_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:52:26.849298",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_195205_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:52:37.367723",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T19:52:18.068316"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:52:26.845830"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:52:37.364936"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195205_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T19:52:50.373356"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_195311_ML_Model_Comparison": {
+      "id": "20250727_195311_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:53:11.006763",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195311_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:53:11.022733",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_195311_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_195311_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:53:24.040299",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_195311_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:53:32.601073",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_195311_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:53:42.848923",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T19:53:24.038501"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:53:32.599870"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:53:42.845700"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195311_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T19:53:55.771312"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_195419_ML_Model_Comparison": {
+      "id": "20250727_195419_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:54:19.457842",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195419_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:54:19.473935",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_195419_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_195419_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:54:32.504342",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_195419_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:54:41.136800",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_195419_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:54:51.642891",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T19:54:32.503202"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:54:41.132894"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T19:54:51.640569"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195419_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T19:55:03.779624"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_195508_ML_Model_Comparison": {
+      "id": "20250727_195508_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:55:08.151873",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195508_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:55:08.168644",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195508_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_195508_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_195508_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:55:21.199699",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195508_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195508_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T19:55:21.198234"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195508_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T19:55:29.849865"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_195533_ML_Model_Comparison": {
+      "id": "20250727_195533_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:55:33.496785",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [],
+      "analysis_results": [],
+      "notes": []
+    },
+    "20250727_195700_ML_Model_Comparison": {
+      "id": "20250727_195700_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:57:00.514618",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195700_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:57:00.531906",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195700_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195700_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T19:57:13.620577"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_195947_ML_Model_Comparison": {
+      "id": "20250727_195947_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T19:59:47.901199",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_195947_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T19:59:47.918838",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_195947_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_195947_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:00:01.172254",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_195947_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:00:09.818325",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_195947_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:00:20.621174",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:00:01.169680"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:00:09.814371"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:00:20.618228"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_195947_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:00:31.753368"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_200032_ML_Model_Comparison": {
+      "id": "20250727_200032_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:00:32.030833",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_200032_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:00:32.047598",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_200032_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_200032_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:00:45.064239",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_200032_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:00:53.599277",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_200032_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:01:03.954421",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:00:45.061154"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:00:53.595782"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:01:03.950191"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200032_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:01:15.830630"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_200145_ML_Model_Comparison": {
+      "id": "20250727_200145_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:01:45.666627",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_200145_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:01:45.683995",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200145_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_200145_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_200145_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:01:58.801983",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200145_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_200145_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:02:07.595586",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200145_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200145_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:01:58.799836"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200145_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:02:07.591874"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200145_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:02:18.226959"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_200616_ML_Model_Comparison": {
+      "id": "20250727_200616_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:06:16.295865",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_200616_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:06:16.313248",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_200616_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_200616_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:06:29.523423",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_200616_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:06:40.609138",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_200616_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:06:51.642208",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:06:29.519366"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:06:40.605476"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:06:51.638198"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200616_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:07:01.051174"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_200701_ML_Model_Comparison": {
+      "id": "20250727_200701_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:07:01.315444",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_200701_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:07:01.332391",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_200701_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_200701_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:07:14.754699",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_200701_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:07:23.041507",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_200701_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:07:34.838495",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:07:14.751174"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:07:23.037937"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:07:34.835832"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_200701_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:07:43.811280"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_201152_ML_Model_Comparison": {
+      "id": "20250727_201152_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:11:52.873296",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_201152_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:11:52.890287",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_201152_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_201152_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:12:05.957903",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_201152_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:12:14.498676",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_201152_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:12:24.791046",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:12:05.954270"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:12:14.494425"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:12:24.787589"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201152_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:12:37.825793"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_201238_ML_Model_Comparison": {
+      "id": "20250727_201238_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:12:38.088074",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_201238_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:12:38.104742",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_201238_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_201238_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:12:51.126469",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_201238_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:12:59.450332",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_201238_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:13:09.957233",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:12:51.122521"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:12:59.446186"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:13:09.948021"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201238_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:13:23.002484"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_201449_ML_Model_Comparison": {
+      "id": "20250727_201449_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:14:49.036654",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_201449_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:14:49.053144",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_201449_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_201449_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:15:02.089719",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_201449_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:15:10.669687",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_201449_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:15:21.183601",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:15:02.086069"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:15:10.664827"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:15:21.179057"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201449_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:15:33.369449"
+        }
+      ],
+      "notes": []
+    },
+    "20250727_201533_ML_Model_Comparison": {
+      "id": "20250727_201533_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-27T20:15:33.684360",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/NMIST.ipynb",
+          "saved_path": "my_experiments/20250727_201533_ML_Model_Comparison/notebooks/NMIST_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:15:33.703653",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 3819,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/NMIST_initial_analysis.md"
+        },
+        {
+          "original_path": "my_experiments/20250727_201533_ML_Model_Comparison/notebooks/model_comparison_v1.ipynb",
+          "saved_path": "my_experiments/20250727_201533_ML_Model_Comparison/notebooks/model_comparison_v1_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:15:46.814775",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 2798,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/1_Logistic_Regression_Iris.ipynb",
+          "saved_path": "my_experiments/20250727_201533_ML_Model_Comparison/notebooks/1_Logistic_Regression_Iris_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:15:55.436948",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1085,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md"
+        },
+        {
+          "original_path": "/Users/jiahuajiang/Desktop/Code/nvidia-agent/3_KMeans_Clustering_Digits.ipynb",
+          "saved_path": "my_experiments/20250727_201533_ML_Model_Comparison/notebooks/3_KMeans_Clustering_Digits_initial.ipynb",
+          "version_name": "initial",
+          "saved_at": "2025-07-27T20:16:05.857240",
+          "notes": "Initial notebook setup with templates",
+          "file_size": 1095,
+          "analysis_performed": true,
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md"
+        }
+      ],
+      "analysis_results": [
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/NMIST_initial_analysis.md",
+          "generated_at": "2025-07-27T20:15:46.812305"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/model_comparison_v1_initial_analysis.md",
+          "generated_at": "2025-07-27T20:15:55.432038"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/1_Logistic_Regression_Iris_initial_analysis.md",
+          "generated_at": "2025-07-27T20:16:05.853034"
+        },
+        {
+          "notebook_version": "initial",
+          "analysis_path": "my_experiments/20250727_201533_ML_Model_Comparison/analysis/3_KMeans_Clustering_Digits_initial_analysis.md",
+          "generated_at": "2025-07-27T20:16:17.985344"
+        }
+      ],
+      "notes": []
+    }
+  },
+  "created": "2025-07-27T19:41:29.328788",
+  "last_updated": "2025-07-27T20:16:17.985835"
+}
