@@ -1,44 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
-
-interface NotebookCell {
-  cell_type: string;
-  source: string[];
-  outputs?: any[];
-  execution_count?: number;
-}
-
-interface NotebookData {
-  cells: NotebookCell[];
-  metadata: any;
-  nbformat: number;
-  nbformat_minor: number;
-}
-
-class NotebookReader {
-  static readNotebook(filePath: string): NotebookData | null {
-    try {
-      const content = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(content) as NotebookData;
-    } catch (error) {
-      console.error('Error reading notebook:', error);
-      return null;
-    }
-  }
-
-  static extractCodeCells(notebook: NotebookData): string[] {
-    return notebook.cells
-      .filter(cell => cell.cell_type === 'code')
-      .map(cell => cell.source.join(''));
-  }
-
-  static extractMarkdownCells(notebook: NotebookData): string[] {
-    return notebook.cells
-      .filter(cell => cell.cell_type === 'markdown')
-      .map(cell => cell.source.join(''));
-  }
-}
 
 interface ChatMessage {
   id: string;
@@ -50,57 +10,11 @@ interface ChatMessage {
 class BackendAPI {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'http://localhost:3000') {
+  constructor(baseUrl: string = 'http://localhost:8000') {
     this.baseUrl = baseUrl;
   }
 
-  async analyzeCode(code: string, imageData?: string): Promise<any> {
-    try {
-      const https = require('https');
-      const http = require('http');
-      const url = require('url');
-      
-      const parsedUrl = url.parse(`${this.baseUrl}/analyze`);
-      const client = parsedUrl.protocol === 'https:' ? https : http;
-      
-      const postData = JSON.stringify({
-        code,
-        image: imageData
-      });
-
-      return new Promise((resolve, reject) => {
-        const req = client.request({
-          hostname: parsedUrl.hostname,
-          port: parsedUrl.port,
-          path: parsedUrl.path,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData)
-          }
-        }, (res: any) => {
-          let data = '';
-          res.on('data', (chunk: any) => data += chunk);
-          res.on('end', () => {
-            try {
-              resolve(JSON.parse(data));
-            } catch (e) {
-              reject(e);
-            }
-          });
-        });
-
-        req.on('error', reject);
-        req.write(postData);
-        req.end();
-      });
-    } catch (error) {
-      console.error('Backend API error:', error);
-      throw error;
-    }
-  }
-
-  async sendChatMessage(message: string, context?: any): Promise<any> {
+  async sendChatMessage(message: string): Promise<any> {
     try {
       const https = require('https');
       const http = require('http');
@@ -110,8 +24,7 @@ class BackendAPI {
       const client = parsedUrl.protocol === 'https:' ? https : http;
       
       const postData = JSON.stringify({
-        message,
-        context
+        message
       });
 
       return new Promise((resolve, reject) => {
@@ -129,14 +42,28 @@ class BackendAPI {
           res.on('data', (chunk: any) => data += chunk);
           res.on('end', () => {
             try {
-              resolve(JSON.parse(data));
+              if (res.statusCode !== 200) {
+                reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+                return;
+              }
+              const parsed = JSON.parse(data);
+              resolve(parsed);
             } catch (e) {
-              reject(e);
+              reject(new Error(`Failed to parse response: ${data}`));
             }
           });
         });
 
-        req.on('error', reject);
+        req.on('error', (err: any) => {
+          console.error('HTTP request error:', err);
+          reject(err);
+        });
+        
+        req.setTimeout(10000, () => {
+          req.destroy();
+          reject(new Error('Request timeout - backend may be slow or unavailable'));
+        });
+        
         req.write(postData);
         req.end();
       });
@@ -168,10 +95,7 @@ class ChatPanel {
       'mlCodeReviewChat',
       'ML Code Review Chat',
       vscode.ViewColumn.Two,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true
-      }
+      { enableScripts: true }
     );
 
     this.panel.webview.html = this.getChatWebviewContent();
@@ -214,27 +138,48 @@ class ChatPanel {
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.message || response.response || 'No response received',
+        content: response.response || 'Sorry, I could not process your request.',
         timestamp: new Date()
       };
 
       this.messages.push(assistantMessage);
-      this.updateWebview();
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Chat error details:', error);
+      
+      let errorText = 'Sorry, I encountered an error. Please try again.';
+      if (error?.code === 'ECONNREFUSED') {
+        errorText = 'Cannot connect to backend server. Make sure app.py is running on port 8000.';
+      } else if (error?.message) {
+        errorText = `Error: ${error.message}`;
+      }
+      
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Error: ${error}`,
+        content: errorText,
         timestamp: new Date()
       };
 
       this.messages.push(errorMessage);
-      this.updateWebview();
     }
+
+    this.updateWebview();
   }
 
   private clearMessages() {
     this.messages = [];
+    this.updateWebview();
+  }
+
+
+  private addMessage(role: 'user' | 'assistant', content: string) {
+    const message: ChatMessage = {
+      id: Date.now().toString(),
+      role,
+      content,
+      timestamp: new Date()
+    };
+    this.messages.push(message);
     this.updateWebview();
   }
 
@@ -247,10 +192,7 @@ class ChatPanel {
   private getChatWebviewContent(): string {
     const messagesHtml = this.messages.map(msg => `
       <div class="message ${msg.role}">
-        <div class="message-header">
-          <span class="role">${msg.role === 'user' ? 'You' : 'AI Assistant'}</span>
-          <span class="timestamp">${msg.timestamp.toLocaleTimeString()}</span>
-        </div>
+        <div class="message-avatar">${msg.role === 'user' ? 'U' : 'AI'}</div>
         <div class="message-content">${this.escapeHtml(msg.content)}</div>
       </div>
     `).join('');
@@ -265,145 +207,280 @@ class ChatPanel {
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            background: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: #f5f5f5;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--vscode-panel-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
         }
         .chat-header {
-            background: #007acc;
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .chat-header h1 {
+            margin: 0;
+            font-size: 20px;
+            flex: 1;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            background: var(--vscode-textLink-foreground);
+            border: none;
             color: white;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            background: var(--vscode-textLink-activeForeground);
+            transform: translateY(-1px);
+        }
+        .clear-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: var(--vscode-button-foreground);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .clear-btn:hover {
+            background: rgba(255,255,255,0.3);
         }
         .chat-messages {
             flex: 1;
-            overflow-y: auto;
             padding: 20px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
         }
         .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            word-wrap: break-word;
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease-in;
         }
         .message.user {
-            align-self: flex-end;
-            background: #007acc;
+            flex-direction: row-reverse;
+        }
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .message.user .message-avatar {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+        .message.assistant .message-avatar {
+            background: var(--vscode-textLink-foreground);
             color: white;
         }
-        .message.assistant {
-            align-self: flex-start;
-            background: white;
-            border: 1px solid #ddd;
-            color: #333;
-        }
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            margin-bottom: 6px;
-            opacity: 0.8;
-        }
         .message-content {
-            white-space: pre-wrap;
-            line-height: 1.4;
+            background: var(--vscode-input-background);
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 70%;
+            line-height: 1.5;
+            border: 1px solid var(--vscode-input-border);
+        }
+        .message.user .message-content {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+        .message.assistant .message-content {
+            background: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
         }
         .chat-input {
-            display: flex;
-            padding: 15px;
-            background: white;
-            border-top: 1px solid #ddd;
-            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid var(--vscode-input-border);
+            background: var(--vscode-panel-background);
+            border-radius: 0 0 8px 8px;
         }
-        .input-field {
+        .input-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .tab-btn {
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border);
+            color: var(--vscode-input-foreground);
+            padding: 8px 16px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .tab-btn.active {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+        .chat-input-form, .code-input-form {
+            display: flex;
+            gap: 12px;
+        }
+        .code-input-form {
+            flex-direction: column;
+            gap: 12px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .chat-input-field {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border);
             border-radius: 6px;
+            padding: 12px 16px;
+            color: var(--vscode-input-foreground);
             font-size: 14px;
             resize: none;
             min-height: 20px;
             max-height: 100px;
         }
-        .send-button, .clear-button {
-            padding: 10px 16px;
+        .chat-input-field:focus {
+            outline: none;
+            border-color: var(--vscode-focusBorder);
+        }
+        .code-input-field {
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: var(--vscode-input-foreground);
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            resize: vertical;
+            min-height: 120px;
+        }
+        .code-input-field:focus {
+            outline: none;
+            border-color: var(--vscode-focusBorder);
+        }
+        .send-btn, .analyze-btn {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
             border: none;
             border-radius: 6px;
+            padding: 12px 20px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
         }
-        .send-button {
-            background: #007acc;
-            color: white;
+        .send-btn:hover, .analyze-btn:hover {
+            background: var(--vscode-button-hoverBackground);
         }
-        .send-button:hover {
-            background: #005a9e;
+        .analyze-btn {
+            align-self: flex-end;
+            min-width: 120px;
         }
-        .send-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .clear-button {
-            background: #f44336;
-            color: white;
-        }
-        .clear-button:hover {
-            background: #d32f2f;
-        }
-        .empty-state {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            margin-top: 50px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <div class="chat-header">
-        ML Code Review Chat Assistant
-    </div>
-    <div class="chat-messages" id="messages">
-        ${messagesHtml || '<div class="empty-state">Start a conversation about your ML code...</div>'}
-    </div>
-    <div class="chat-input">
-        <textarea 
-            id="messageInput" 
-            class="input-field" 
-            placeholder="Ask about your ML code, request analysis, or chat about best practices..."
-            rows="1"
-        ></textarea>
-        <button id="sendButton" class="send-button">Send</button>
-        <button id="clearButton" class="clear-button">Clear</button>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 ML Code Review Assistant</h1>
+            <div class="header-buttons">
+                <button class="clear-btn" id="clearBtn">Clear Chat</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="messages">
+            ${messagesHtml}
+        </div>
+        <div class="chat-input">
+            <div class="input-tabs">
+                <button type="button" class="tab-btn active" id="chatTab">💬 Chat</button>
+                <button type="button" class="tab-btn" id="codeTab">📝 Code Analysis</button>
+            </div>
+            <form class="chat-input-form" id="chatForm">
+                <textarea 
+                    class="chat-input-field" 
+                    id="messageInput" 
+                    placeholder="Ask about ML code, best practices, or request analysis..."
+                    rows="1"
+                ></textarea>
+                <button type="submit" class="send-btn">Send</button>
+            </form>
+            <form class="code-input-form hidden" id="codeForm">
+                <textarea 
+                    class="code-input-field" 
+                    id="codeInput" 
+                    placeholder="Paste your ML code here for analysis..."
+                    rows="8"
+                ></textarea>
+                <button type="submit" class="analyze-btn">Analyze Code</button>
+            </form>
+        </div>
     </div>
 
     <script>
         const vscode = acquireVsCodeApi();
+        const messagesContainer = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const clearButton = document.getElementById('clearButton');
-        const messages = document.getElementById('messages');
+        const chatForm = document.getElementById('chatForm');
+        const clearButton = document.getElementById('clearBtn');
+        const codeInput = document.getElementById('codeInput');
+        const codeForm = document.getElementById('codeForm');
+        const chatTab = document.getElementById('chatTab');
+        const codeTab = document.getElementById('codeTab');
 
-        function sendMessage() {
-            const content = messageInput.value.trim();
-            if (content) {
-                vscode.postMessage({
-                    type: 'sendMessage',
-                    content: content
-                });
-                messageInput.value = '';
-                sendButton.disabled = true;
-                setTimeout(() => {
-                    sendButton.disabled = false;
-                }, 1000);
-            }
-        }
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Handle form submission
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            vscode.postMessage({
+                type: 'sendMessage',
+                content: message
+            });
+            
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        });
 
         function clearChat() {
             vscode.postMessage({
@@ -411,22 +488,47 @@ class ChatPanel {
             });
         }
 
-        sendButton.addEventListener('click', sendMessage);
         clearButton.addEventListener('click', clearChat);
-
-        messageInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+        
+        // Tab switching
+        chatTab.addEventListener('click', function() {
+            chatTab.classList.add('active');
+            codeTab.classList.remove('active');
+            chatForm.classList.remove('hidden');
+            codeForm.classList.add('hidden');
+            messageInput.focus();
         });
-
-        messageInput.addEventListener('input', () => {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+        
+        codeTab.addEventListener('click', function() {
+            codeTab.classList.add('active');
+            chatTab.classList.remove('active');
+            codeForm.classList.remove('hidden');
+            chatForm.classList.add('hidden');
+            codeInput.focus();
         });
-
-        messages.scrollTo(0, messages.scrollHeight);
+        
+        // Handle code analysis
+        codeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const code = codeInput.value.trim();
+            if (!code) return;
+            
+            const message = \`Please analyze this ML code:\\n\\n\\\`\\\`\\\`python\\n\${code}\\n\\\`\\\`\\\`\`;
+            
+            vscode.postMessage({
+                type: 'sendMessage',
+                content: message
+            });
+            
+            codeInput.value = '';
+            
+            // Switch back to chat tab to see response
+            chatTab.click();
+        });
+        
+        // Focus on input
+        messageInput.focus();
     </script>
 </body>
 </html>`;
@@ -443,6 +545,9 @@ class ChatPanel {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  console.log('🚀 ML Code Review extension is now activating!');
+  vscode.window.showInformationMessage('ML Code Review extension activated!');
+  
   const api = new BackendAPI();
   const chatPanel = new ChatPanel(api, context);
 
@@ -450,115 +555,8 @@ export function activate(context: vscode.ExtensionContext) {
     chatPanel.show();
   });
 
-  const analyzeNotebook = vscode.commands.registerCommand('mlCodeReview.analyzeNotebook', async (uri: vscode.Uri) => {
-    if (!uri) {
-      const activeEditor = vscode.window.activeTextEditor;
-      if (!activeEditor) {
-        vscode.window.showErrorMessage('No notebook file selected');
-        return;
-      }
-      uri = activeEditor.document.uri;
-    }
-
-    const filePath = uri.fsPath;
-    if (!filePath.endsWith('.ipynb')) {
-      vscode.window.showErrorMessage('Please select a Jupyter notebook file (.ipynb)');
-      return;
-    }
-
-    const notebook = NotebookReader.readNotebook(filePath);
-    if (!notebook) {
-      vscode.window.showErrorMessage('Failed to read notebook file');
-      return;
-    }
-
-    const codeCells = NotebookReader.extractCodeCells(notebook);
-    const combinedCode = codeCells.join('\n\n');
-
-    vscode.window.showInformationMessage(`Found ${codeCells.length} code cells`);
-    
-    try {
-      const analysis = await api.analyzeCode(combinedCode);
-      
-      const panel = vscode.window.createWebviewPanel(
-        'mlCodeReview',
-        'ML Code Review Results',
-        vscode.ViewColumn.Two,
-        { enableScripts: true }
-      );
-
-      panel.webview.html = getWebviewContent(analysis, codeCells.length);
-    } catch (error) {
-      vscode.window.showErrorMessage(`Analysis failed: ${error}`);
-    }
-  });
-
-  const uploadImage = vscode.commands.registerCommand('mlCodeReview.uploadImage', async () => {
-    const options: vscode.OpenDialogOptions = {
-      canSelectMany: false,
-      openLabel: 'Select Image',
-      filters: {
-        'Images': ['png', 'jpg', 'jpeg', 'gif', 'bmp']
-      }
-    };
-
-    const fileUri = await vscode.window.showOpenDialog(options);
-    if (fileUri && fileUri[0]) {
-      const imagePath = fileUri[0].fsPath;
-      const imageData = fs.readFileSync(imagePath, 'base64');
-      
-      vscode.window.showInformationMessage(`Image loaded: ${path.basename(imagePath)}`);
-      
-      context.globalState.update('selectedImage', imageData);
-      context.globalState.update('selectedImagePath', imagePath);
-    }
-  });
-
-  context.subscriptions.push(openChat, analyzeNotebook, uploadImage);
+  context.subscriptions.push(openChat);
 }
 
-function getWebviewContent(analysis: any, cellCount: number): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ML Code Review Results</title>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .header { 
-            background: #f0f0f0; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px;
-        }
-        .analysis { 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            padding: 15px; 
-            border-radius: 8px;
-        }
-        .code-count {
-            color: #666;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>ML Code Review Results</h1>
-        <p class="code-count">Analyzed ${cellCount} code cells</p>
-    </div>
-    <div class="analysis">
-        <h2>Analysis Results</h2>
-        <pre>${JSON.stringify(analysis, null, 2)}</pre>
-    </div>
-</body>
-</html>`;
-}
 
 export function deactivate() {}
