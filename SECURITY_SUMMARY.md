@@ -22,8 +22,6 @@
 
 ## 🔑 Your API Key Status
 
-**Current API Key**: `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`
-
 **Status**: ✅ **SECURE** - Not tracked by git
 
 **Location**: `secrets.env` (local file only)
