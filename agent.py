@@ -1,7 +1,11 @@
 import requests
 import json
 from typing import Optional, Dict, Any
-
+import os 
+from dotenv import load_dotenv
+_ = load_dotenv("../variables.env")
+_ = load_dotenv("secrets.env")
+API_KEY=os.environ["API_KEY"]
 class NvidiaLlamaAgent:
     def __init__(self, api_key: str):
         """
