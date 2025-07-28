@@ -24,12 +24,14 @@ try:
     API_KEY = os.environ.get("API_KEY")
     
     if not API_KEY:
-        print("Warning: API_KEY not found in environment variables")
-        API_KEY = "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"
-    
-    conversation_agent = ConversationAgent(API_KEY)
-    nvidia_agent = NvidiaLlamaAgent(API_KEY)
-    print(f"✅ Backend initialized with API key: {API_KEY[:20]}...")
+        print("❌ Error: API_KEY not found in environment variables")
+        print("Please set your NVIDIA API key in secrets.env file")
+        conversation_agent = None
+        nvidia_agent = None
+    else:
+        conversation_agent = ConversationAgent(API_KEY)
+        nvidia_agent = NvidiaLlamaAgent(API_KEY)
+        print(f"✅ Backend initialized with API key: {API_KEY[:20]}...")
 except Exception as e:
     print(f"❌ Error initializing backend: {e}")
     conversation_agent = None
