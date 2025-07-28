@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from nvidia_agent import NvidiaLlamaAgent
+from agent import NvidiaLlamaAgent
 from dotenv import load_dotenv
 _ = load_dotenv("secrets.env")
 API_KEY=os.environ["API_KEY"]
@@ -12,6 +12,7 @@ app = Flask(__name__)
 agent = NvidiaLlamaAgent(API_KEY)
 
 cuurent_session = []
+agent.analyze_notebook()
 @app.route("/chat", methods=["POST"])
 def chat():
     """
@@ -34,10 +35,18 @@ def chat():
 
 @app.route("/summary", methods=["GET"])
 def getSummary():
+    
     return
+
 @app.route("/notebook", methods=["POST"])
 def notebook():
     # add notebook to current session
+    #process json file
+    data = request.json
+    if not data or 'notebook' not in data:
+        return jsonify({"error": "Invalid input"}), 400
+    notebook = data['notebook']
+    agent.set_notebook(notebook)
     return
 if __name__ == "__main__":
     app.run(port=8000, debug=True)
