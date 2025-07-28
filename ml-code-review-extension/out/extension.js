@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
+const fs = require("fs");
 class BackendAPI {
-    constructor(baseUrl = 'http://localhost:8000') {
+    constructor(baseUrl = 'http://localhost:3000') {
         this.baseUrl = baseUrl;
     }
     async sendChatMessage(message) {
@@ -60,6 +61,55 @@ class BackendAPI {
             throw error;
         }
     }
+    async uploadFile(filePath) {
+        try {
+            const https = require('https');
+            const http = require('http');
+            const url = require('url');
+            const FormData = require('form-data');
+            const parsedUrl = url.parse(`${this.baseUrl}/upload`);
+            const client = parsedUrl.protocol === 'https:' ? https : http;
+            const form = new FormData();
+            form.append('file', fs.createReadStream(filePath));
+            return new Promise((resolve, reject) => {
+                const req = client.request({
+                    hostname: parsedUrl.hostname,
+                    port: parsedUrl.port,
+                    path: parsedUrl.path,
+                    method: 'POST',
+                    headers: form.getHeaders()
+                }, (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => data += chunk);
+                    res.on('end', () => {
+                        try {
+                            if (res.statusCode !== 200) {
+                                reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+                                return;
+                            }
+                            resolve(JSON.parse(data));
+                        }
+                        catch (e) {
+                            reject(new Error(`Failed to parse response: ${data}`));
+                        }
+                    });
+                });
+                req.on('error', (err) => {
+                    console.error('Upload request error:', err);
+                    reject(err);
+                });
+                req.setTimeout(30000, () => {
+                    req.destroy();
+                    reject(new Error('Upload timeout - file may be too large'));
+                });
+                form.pipe(req);
+            });
+        }
+        catch (error) {
+            console.error('Upload API error:', error);
+            throw error;
+        }
+    }
 }
 class ChatPanel {
     constructor(api, context) {
@@ -89,6 +139,15 @@ class ChatPanel {
                     break;
                 case 'clearChat':
                     this.clearMessages();
+                    break;
+                case 'uploadFile':
+                    await this.handleUploadFile();
+                    break;
+                case 'uploadImage':
+                    await this.handleUploadImage();
+                    break;
+                case 'uploadNotebook':
+                    await this.handleUploadNotebook();
                     break;
             }
         });
@@ -144,6 +203,93 @@ class ChatPanel {
         };
         this.messages.push(message);
         this.updateWebview();
+    }
+    async handleUploadFile() {
+        const options = {
+            canSelectMany: false,
+            openLabel: 'Select File',
+            filters: {
+                'All Files': ['*'],
+                'Code Files': ['py', 'js', 'java', 'cpp', 'r', 'txt', 'md'],
+                'Data Files': ['csv', 'json', 'xml'],
+                'Documents': ['txt', 'md', 'pdf']
+            }
+        };
+        const fileUri = await vscode.window.showOpenDialog(options);
+        if (fileUri && fileUri[0]) {
+            const filePath = fileUri[0].fsPath;
+            const fileName = require('path').basename(filePath);
+            this.addMessage('user', `📄 Uploading file: ${fileName}`);
+            try {
+                const result = await this.api.uploadFile(filePath);
+                if (result.success) {
+                    const responseText = `✅ File "${fileName}" uploaded successfully!\n\n📊 Analysis:\n${result.analysis || 'File processed successfully.'}`;
+                    this.addMessage('assistant', responseText);
+                }
+                else {
+                    this.addMessage('assistant', `❌ Upload failed: ${result.error || 'Unknown error'}`);
+                }
+            }
+            catch (error) {
+                this.addMessage('assistant', `❌ Upload failed: ${error?.message || 'Unknown error'}`);
+            }
+        }
+    }
+    async handleUploadImage() {
+        const options = {
+            canSelectMany: false,
+            openLabel: 'Select Image',
+            filters: {
+                'Images': ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg']
+            }
+        };
+        const fileUri = await vscode.window.showOpenDialog(options);
+        if (fileUri && fileUri[0]) {
+            const filePath = fileUri[0].fsPath;
+            const fileName = require('path').basename(filePath);
+            this.addMessage('user', `🖼️ Uploading image: ${fileName}`);
+            try {
+                const result = await this.api.uploadFile(filePath);
+                if (result.success) {
+                    const responseText = `✅ Image "${fileName}" uploaded successfully!\n\n🔍 Analysis:\n${result.analysis || 'Image processed successfully.'}`;
+                    this.addMessage('assistant', responseText);
+                }
+                else {
+                    this.addMessage('assistant', `❌ Upload failed: ${result.error || 'Unknown error'}`);
+                }
+            }
+            catch (error) {
+                this.addMessage('assistant', `❌ Upload failed: ${error?.message || 'Unknown error'}`);
+            }
+        }
+    }
+    async handleUploadNotebook() {
+        const options = {
+            canSelectMany: false,
+            openLabel: 'Select Jupyter Notebook',
+            filters: {
+                'Jupyter Notebooks': ['ipynb']
+            }
+        };
+        const fileUri = await vscode.window.showOpenDialog(options);
+        if (fileUri && fileUri[0]) {
+            const filePath = fileUri[0].fsPath;
+            const fileName = require('path').basename(filePath);
+            this.addMessage('user', `📓 Uploading notebook: ${fileName}`);
+            try {
+                const result = await this.api.uploadFile(filePath);
+                if (result.success) {
+                    const responseText = `✅ Notebook "${fileName}" uploaded successfully!\n\n📊 Analysis:\n${result.analysis || 'Notebook processed successfully.'}\n\n📈 Code cells analyzed: ${result.code_cells || 'N/A'}`;
+                    this.addMessage('assistant', responseText);
+                }
+                else {
+                    this.addMessage('assistant', `❌ Upload failed: ${result.error || 'Unknown error'}`);
+                }
+            }
+            catch (error) {
+                this.addMessage('assistant', `❌ Upload failed: ${error?.message || 'Unknown error'}`);
+            }
+        }
     }
     updateWebview() {
         if (this.panel) {
@@ -366,6 +512,59 @@ class ChatPanel {
             align-self: flex-end;
             min-width: 120px;
         }
+        .upload-panel {
+            padding: 20px 0;
+        }
+        .upload-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .upload-btn {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: 2px dashed var(--vscode-button-background);
+            border-radius: 12px;
+            padding: 24px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .upload-btn:hover {
+            background: var(--vscode-button-hoverBackground);
+            border-color: var(--vscode-button-hoverBackground);
+            transform: translateY(-2px);
+        }
+        .upload-btn small {
+            font-size: 11px;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+        .upload-info {
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .upload-info p {
+            margin: 0 0 12px 0;
+            color: var(--vscode-textLink-foreground);
+        }
+        .upload-info ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .upload-info li {
+            margin-bottom: 4px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -387,6 +586,7 @@ class ChatPanel {
             <div class="input-tabs">
                 <button type="button" class="tab-btn active" id="chatTab">💬 Chat</button>
                 <button type="button" class="tab-btn" id="codeTab">📝 Code Analysis</button>
+                <button type="button" class="tab-btn" id="uploadTab">📁 Upload Files</button>
             </div>
             <form class="chat-input-form" id="chatForm">
                 <textarea 
@@ -406,6 +606,31 @@ class ChatPanel {
                 ></textarea>
                 <button type="submit" class="analyze-btn">Analyze Code</button>
             </form>
+            <div class="upload-panel hidden" id="uploadPanel">
+                <div class="upload-buttons">
+                    <button type="button" class="upload-btn" id="uploadFileBtn">
+                        📄 Upload File
+                        <small>(.py, .ipynb, .txt, etc.)</small>
+                    </button>
+                    <button type="button" class="upload-btn" id="uploadImageBtn">
+                        🖼️ Upload Image
+                        <small>(.png, .jpg, .gif, etc.)</small>
+                    </button>
+                    <button type="button" class="upload-btn" id="uploadNotebookBtn">
+                        📓 Upload Notebook
+                        <small>(.ipynb files)</small>
+                    </button>
+                </div>
+                <div class="upload-info">
+                    <p>💡 <strong>Upload any file type:</strong></p>
+                    <ul>
+                        <li><strong>Code Files:</strong> .py, .js, .java, .cpp, .r</li>
+                        <li><strong>Notebooks:</strong> .ipynb files for analysis</li>
+                        <li><strong>Images:</strong> Screenshots, plots, diagrams</li>
+                        <li><strong>Documents:</strong> .txt, .md, .csv</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -419,6 +644,11 @@ class ChatPanel {
         const codeForm = document.getElementById('codeForm');
         const chatTab = document.getElementById('chatTab');
         const codeTab = document.getElementById('codeTab');
+        const uploadTab = document.getElementById('uploadTab');
+        const uploadPanel = document.getElementById('uploadPanel');
+        const uploadFileBtn = document.getElementById('uploadFileBtn');
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const uploadNotebookBtn = document.getElementById('uploadNotebookBtn');
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
@@ -454,17 +684,30 @@ class ChatPanel {
         chatTab.addEventListener('click', function() {
             chatTab.classList.add('active');
             codeTab.classList.remove('active');
+            uploadTab.classList.remove('active');
             chatForm.classList.remove('hidden');
             codeForm.classList.add('hidden');
+            uploadPanel.classList.add('hidden');
             messageInput.focus();
         });
         
         codeTab.addEventListener('click', function() {
             codeTab.classList.add('active');
             chatTab.classList.remove('active');
+            uploadTab.classList.remove('active');
             codeForm.classList.remove('hidden');
             chatForm.classList.add('hidden');
+            uploadPanel.classList.add('hidden');
             codeInput.focus();
+        });
+        
+        uploadTab.addEventListener('click', function() {
+            uploadTab.classList.add('active');
+            chatTab.classList.remove('active');
+            codeTab.classList.remove('active');
+            uploadPanel.classList.remove('hidden');
+            chatForm.classList.add('hidden');
+            codeForm.classList.add('hidden');
         });
         
         // Handle code analysis
@@ -485,6 +728,25 @@ class ChatPanel {
             
             // Switch back to chat tab to see response
             chatTab.click();
+        });
+        
+        // Upload button handlers
+        uploadFileBtn.addEventListener('click', function() {
+            vscode.postMessage({
+                type: 'uploadFile'
+            });
+        });
+        
+        uploadImageBtn.addEventListener('click', function() {
+            vscode.postMessage({
+                type: 'uploadImage'
+            });
+        });
+        
+        uploadNotebookBtn.addEventListener('click', function() {
+            vscode.postMessage({
+                type: 'uploadNotebook'
+            });
         });
         
         // Focus on input
