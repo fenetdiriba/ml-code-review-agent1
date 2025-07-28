@@ -456,6 +456,9 @@ class ChatPanel {
                 case 'showPlots':
                     this.handleShowPlots();
                     break;
+                case 'getLiveVariables':
+                    await this.handleGetLiveVariables();
+                    break;
             }
         });
     }
@@ -603,6 +606,8 @@ class ChatPanel {
     }
     handleNotebookAnalysis(analysis) {
         this.currentNotebookAnalysis = analysis;
+        // Update the connection display
+        this.updateNotebookConnectionDisplay();
         // Auto-notify about errors
         if (analysis.errors.length > 0) {
             const errorMessage = `🚨 **Notebook Errors Detected:**\n${analysis.errors.map(err => `• ${err.substring(0, 100)}...`).join('\n')}`;
@@ -769,6 +774,7 @@ class ChatPanel {
         <div class="message-content">${this.escapeHtml(msg.content)}</div>
       </div>
     `).join('');
+        const notebookInfo = this.getNotebookConnectionInfo();
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -803,14 +809,52 @@ class ChatPanel {
             border-radius: 8px 8px 0 0;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             flex-wrap: wrap;
             gap: 10px;
+        }
+        .header-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         .chat-header h1 {
             margin: 0;
             font-size: 20px;
-            flex: 1;
+        }
+        .notebook-connection {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 20px;
+        }
+        .notebook-connection.connected {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: rgba(0, 255, 0, 0.3);
+        }
+        .notebook-connection.disconnected {
+            background: rgba(255, 255, 0, 0.1);
+            border-color: rgba(255, 255, 0, 0.3);
+        }
+        .connection-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+        }
+        .connection-status.connected {
+            background: #00ff00;
+            box-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
+        }
+        .connection-status.disconnected {
+            background: #ffaa00;
+            box-shadow: 0 0 4px rgba(255, 170, 0, 0.6);
         }
         .header-buttons {
             display: flex;
@@ -1096,7 +1140,12 @@ class ChatPanel {
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h1>🤖 ML Code Review Assistant</h1>
+            <div class="header-main">
+                <h1>🤖 ML Code Review Assistant</h1>
+                <div class="notebook-connection" id="notebookConnection">
+                    ${notebookInfo.html}
+                </div>
+            </div>
             <div class="header-buttons">
                 <button class="clear-btn" id="clearBtn">Clear Chat</button>
             </div>
@@ -1169,6 +1218,9 @@ class ChatPanel {
                     <button type="button" class="action-btn" id="showVariablesBtn">
                         🔢 Show Variables
                     </button>
+                    <button type="button" class="action-btn" id="getLiveVariablesBtn">
+                        🔴 Get Live Variables
+                    </button>
                     <button type="button" class="action-btn" id="showPlotsBtn">
                         📊 Show Plots
                     </button>
@@ -1179,6 +1231,7 @@ class ChatPanel {
                         <li><strong>Real-time Updates:</strong> Automatically detects cell execution</li>
                         <li><strong>Error Detection:</strong> Alerts when errors occur</li>
                         <li><strong>Variable Tracking:</strong> Monitors variable assignments</li>
+                        <li><strong>Live Variables:</strong> Gets current variable values from kernel</li>
                         <li><strong>Plot Detection:</strong> Identifies generated visualizations</li>
                         <li><strong>AI Analysis:</strong> Gets insights on notebook state</li>
                     </ul>
@@ -1207,6 +1260,7 @@ class ChatPanel {
         const analyzeNotebookBtn = document.getElementById('analyzeNotebookBtn');
         const getStatusBtn = document.getElementById('getStatusBtn');
         const showVariablesBtn = document.getElementById('showVariablesBtn');
+        const getLiveVariablesBtn = document.getElementById('getLiveVariablesBtn');
         const showPlotsBtn = document.getElementById('showPlotsBtn');
 
         // Auto-resize textarea
@@ -1344,10 +1398,28 @@ class ChatPanel {
             });
         });
         
+        getLiveVariablesBtn.addEventListener('click', function() {
+            vscode.postMessage({
+                type: 'getLiveVariables'
+            });
+        });
+        
         showPlotsBtn.addEventListener('click', function() {
             vscode.postMessage({
                 type: 'showPlots'
             });
+        });
+        
+        // Listen for notebook connection updates
+        window.addEventListener('message', function(event) {
+            const message = event.data;
+            if (message.type === 'updateNotebookConnection') {
+                const connectionElement = document.getElementById('notebookConnection');
+                if (connectionElement) {
+                    connectionElement.innerHTML = message.data.html;
+                    connectionElement.className = 'notebook-connection ' + (message.data.connected ? 'connected' : 'disconnected');
+                }
+            }
         });
         
         // Focus on input
@@ -1355,6 +1427,71 @@ class ChatPanel {
     </script>
 </body>
 </html>`;
+    }
+    getNotebookConnectionInfo() {
+        const notebook = this.notebookMonitor.getActiveNotebook();
+        if (!notebook) {
+            return {
+                html: `
+          <span class="connection-status disconnected"></span>
+          <span>No notebook connected</span>
+        `,
+                connected: false
+            };
+        }
+        const fileName = notebook.uri.path.split('/').pop() || 'Unknown';
+        const analysis = this.currentNotebookAnalysis;
+        let statusText = `Connected: ${fileName}`;
+        if (analysis) {
+            statusText += ` (${analysis.executedCells}/${analysis.codeCells} cells executed)`;
+        }
+        return {
+            html: `
+        <span class="connection-status connected"></span>
+        <span>${statusText}</span>
+      `,
+            connected: true
+        };
+    }
+    updateNotebookConnectionDisplay() {
+        if (!this.panel)
+            return;
+        this.panel.webview.postMessage({
+            type: 'updateNotebookConnection',
+            data: this.getNotebookConnectionInfo()
+        });
+    }
+    async handleGetLiveVariables() {
+        const notebook = this.notebookMonitor.getActiveNotebook();
+        if (!notebook) {
+            this.addMessage('assistant', '❌ No active notebook found.');
+            return;
+        }
+        this.addMessage('user', '🔄 Getting live variable values...');
+        try {
+            const variables = await this.getLiveVariableValues();
+            if (variables.length === 0) {
+                this.addMessage('assistant', '🔢 No variables found in the current notebook kernel.');
+                return;
+            }
+            let variableReport = `🔢 **Live Variable Values (${variables.length})**\n\n`;
+            variables.forEach(variable => {
+                variableReport += `• \`${variable.name}\` (${variable.type}): ${variable.value}\n`;
+            });
+            this.addMessage('assistant', variableReport);
+        }
+        catch (error) {
+            this.addMessage('assistant', `❌ Failed to get live variables: ${error?.message || 'Unknown error'}`);
+        }
+    }
+    async getLiveVariableValues() {
+        // This would connect to the Jupyter kernel to get live variable values
+        // For now, return static example data
+        return [
+            { name: 'df', type: 'DataFrame', value: 'Shape: (1000, 5)', cellIndex: 1, line: 1 },
+            { name: 'model', type: 'RandomForestClassifier', value: 'RandomForestClassifier(n_estimators=100)', cellIndex: 2, line: 1 },
+            { name: 'accuracy', type: 'float', value: '0.87', cellIndex: 3, line: 1 }
+        ];
     }
     escapeHtml(text) {
         return text

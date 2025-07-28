@@ -22,7 +22,6 @@ The following files are now protected by `.gitignore` and will NOT be committed 
 2. **Edit the file** and add your actual API key:
    ```bash
    # secrets.env
-   API_KEY=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
    ```
 
 3. **Never commit** `secrets.env` to version control
