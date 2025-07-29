@@ -167,3 +167,6 @@ public
 # Temporary folders
 tmp/
 temp/ 
+
+*.vsix
+data/MNIST/raw/
