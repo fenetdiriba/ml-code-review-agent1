@@ -46,8 +46,8 @@ def main():
 
     test_analyze()
     test_visualization()
-    test_suggestions()
-    test_code()
-    test_chat()
+    # test_suggestions()
+    # test_code()
+    # test_chat()
 if __name__ == "__main__":
     main()

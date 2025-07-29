@@ -320,27 +320,36 @@ class ML_Assistant_Agent:
         prompt = PromptTemplate(
             input_variables=["notebook_string"],
             partial_variables={"format_instructions": format_instructions},
-            template="""        Please analyze this Jupyter notebook for machine learning best practices:       
-        {notebook_string}
-        Focus on:
-        1. Overall code quality assessment
-        2. ML-specific best practices analysis
-        3. Data handling and preprocessing review
-        4. Model implementation suggestions
-        5. Visualization and output improvements
-        6. Code organization and documentation suggestions
-        7. Performance and scalability considerations
-        Return the response in JSON format with keys for each section.
-        example:
-        {{
-            "overall_assessment": "The code is well-structured but lacks proper data preprocessing.",
-            "best_practices": "Use sklearn's StandardScaler for feature scaling.",
-            "data_handling": "Ensure missing values are handled before training.",
-            "model_implementation": "Consider using cross-validation for model evaluation.",
-            "visualization": "Add confusion matrix for classification tasks.",
-            "organization": "Separate data loading and preprocessing into functions.",
-            "performance": "Optimize hyperparameters using grid search."
-        }}"""
+            template = """
+Please analyze this Jupyter notebook for machine learning best practices:
+
+{notebook_string}
+
+Focus on:
+1. Overall code quality assessment
+2. ML-specific best practices analysis
+3. Data handling and preprocessing review
+4. Model implementation suggestions
+5. Visualization and output improvements
+6. Code organization and documentation suggestions
+7. Performance and scalability considerations
+
+Return ONLY the JSON response matching this schema exactly (no extra text or explanations):
+
+{format_instructions}
+
+Example:
+{{
+    "overall_assessment": "The code is well-structured but lacks proper data preprocessing.",
+    "best_practices": "Use sklearn's StandardScaler for feature scaling.",
+    "data_handling": "Ensure missing values are handled before training.",
+    "model_implementation": "Consider using cross-validation for model evaluation.",
+    "visualization": "Add confusion matrix for classification tasks.",
+    "organization": "Separate data loading and preprocessing into functions.",
+    "performance": "Optimize hyperparameters using grid search."
+}}
+"""
+
         )
         formatted_prompt = prompt.format(notebook_string=notebook_string, format_instructions=format_instructions)
         response = self.ask(formatted_prompt)
@@ -348,7 +357,7 @@ class ML_Assistant_Agent:
 
         try:
             parsed = analysis_parser.parse(response)
-            return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
+            return parsed  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
             print("Parsing failed:", e)
             return response
@@ -401,37 +410,39 @@ class ML_Assistant_Agent:
             input_variables=["notebook_string", "old_notebook_string"],
             partial_variables={"format_instructions": format_instructions},
             template="""
-        Here are our old notebooks: {old_notebook_string}
-        Please suggest visualizations for the following notebook data:
-        {notebook_string}
-        Focus on:
-        1. Key insights that can be visualized
-        2. Common visualization types for ML data
-        3. Any specific libraries or tools to use (e.g., matplotlib, seaborn, plotly)
-        Provide the response in JSON format with visualization types and descriptions.
-        example:
-            Provide specific Python code examples using matplotlib, seaborn, or plotly.
-            return response in JSON format example:
-            [
-                {{
-                    "visualization_type": "scatter_plot",
-                    "description": "Scatter plot of feature vs target variable",
-                    "why": "Useful for understanding relationships between features and target variable"
-                }},
-            ]
-        """
+Here are our old notebooks: {old_notebook_string}
+Please suggest visualizations for the following notebook data:
+{notebook_string}
+
+Focus on:
+1. Key insights that can be visualized
+2. Common visualization types for ML data
+3. Any specific libraries or tools to use (e.g., matplotlib, seaborn, plotly)
+
+You MUST respond with valid JSON using this structure (and only this structure):
+
+{format_instructions}
+
+Example:
+{{
+  "visualizations": [
+    {{
+      "visualization_type": "scatter_plot",
+      "description": "Scatter plot of feature vs target variable",
+      "why": "Useful for understanding relationships between features and target variable"    }}
+  ]
+}}
+"""
         )
         formatted_prompt = prompt.format(
             notebook_string=notebook_string,
             old_notebook_string=old_notebook_string
         )
         response = self.ask(formatted_prompt)
-        matches = re.findall(r"```(.*?)```", response, re.DOTALL)
-        response = "\n".join(matches) if matches else response
-        print("Response from model:", response)
+
         try:
             parsed = visualization_parser.parse(response)
-            return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
+            return parsed.visualizations  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
             print("Parsing failed:", e)
             return response
