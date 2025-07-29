@@ -433,6 +433,36 @@ class ML_Assistant_Agent:
             }}
         """
         return self.ask(prompt)
+    def chat(self, question: str) -> str:
+        """
+        Send a user question to the model, update history, and return the reply.
+
+        Args:
+            question (str): The user's input question.
+
+        Returns:
+            str: The assistant's response (or error message).
+        """
+        try:
+            old_notebook_string = "".join(self.notebook_history[:3])
+            notebook_dict = self.read_notebook(self.current_notebook)
+
+            if not self.current_notebook:
+                return "No notebook uploaded. Please upload a notebook first."
+            notebook_string = safe_serialize(notebook_dict)
+            prompt = f"""The user says: {question}
+            Please provide a helpful response.
+            Our current notebook is: {notebook_string}
+            Here are our old notebooks: {old_notebook_string}
+            """
+            if self.problem_context and self.data_description:
+                prompt += f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
+            return self.ask(prompt)
+
+
+        except Exception as e:
+            print(f"Error in chat method: {e}")
+            return "Sorry, I couldn't process your request."
 
     
 

@@ -38,12 +38,16 @@ def test_suggestions():
 def test_code():
     code_response = requests.get(f"{BASE_URL}/code?topic=suggestion&option=add_data_cleaning")
     print(code_response.json())
+def test_chat():
+    chat_response = requests.get(f"{BASE_URL}/chat", json={"question": "What is the purpose of this notebook?"})
+    print(chat_response.json())
 def main():
     test_upload()
 
     # test_analyze()
     # test_visualization()
     # test_suggestions()
-    test_code()
+    # test_code()
+    test_chat()
 if __name__ == "__main__":
     main()

@@ -170,7 +170,6 @@ def upload_file():
         # ml_agent.problem_context = f"Uploaded notebook: {file_path}"
         ml_agent.current_notebook = file_path
         #pretty print the dict
-        pprint(ml_agent.read_notebook(ml_agent.current_notebook))
         return jsonify({"message": "File uploaded successfully", "file_path": file_path}), 200
     except Exception as e:
         print(f"Error processing file upload: {e}")
@@ -230,8 +229,7 @@ def chat_with_agent():
     
     if not question:
         return jsonify({"error": "No question provided"}), 400
-    
-    response = ml_agent.ask(question)
+    response = ml_agent.chat(question)
     return jsonify({"response": response})
 
 @app.route('/health', methods=['GET'])
