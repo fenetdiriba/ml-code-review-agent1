@@ -8,6 +8,7 @@ import tempfile
 from datetime import datetime
 from PIL import Image
 import io
+import nbformat
 from pprint import pprint
 # Add the parent directory to the path to import agent.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -104,6 +105,57 @@ def set_data_description():
     ml_agent.data_description = data_description
     return jsonify({"message": "Data description set successfully"}), 200
 
+@app.route('/upload-json', methods=['POST'])
+def upload_json_notebook():
+    try:
+        data = request.get_data(as_text=True)
+        notebook = nbformat.reads(data, as_version=4)
+
+        # Do something with notebook
+        code_cells = [cell['source'] for cell in notebook.cells if cell['cell_type'] == 'code']
+        # save the notebook to a temporary file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.ipynb')
+        with open(temp_file.name, 'w') as f:
+            nbformat.write(notebook, f)
+        ml_agent.current_notebook = temp_file.name
+
+        return jsonify({
+            "message": "Notebook JSON received and parsed",
+            "code_cell_count": len(code_cells),
+            "example_code": code_cells[:1]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    """Handle ipynb notebook file uploads and set it as current notebook context for agent"""
+    if not ml_agent:
+        return jsonify({"error": "Conversation agent not initialized"}), 500
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part in the request"}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+        
+        # Save the uploaded file
+        file_data = file.read()
+        file_path = save_uploaded_file(file_data, file.filename)
+        print(f"File uploaded and saved to: {file_path}")
+        if not file_path:
+            return jsonify({"error": "Failed to save uploaded file"}), 500
+        
+        # Set the uploaded notebook as current context for the agent
+        # ml_agent.problem_context = f"Uploaded notebook: {file_path}"
+        ml_agent.current_notebook = file_path
+        #pretty print the dict
+        return jsonify({"message": "File uploaded successfully", "file_path": file_path}), 200
+    except Exception as e:
+        print(f"Error processing file upload: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/suggestions', methods=['GET'])
 def get_suggestions():
     """Return a list of suggestions to improve notebook machine learning architure"""
@@ -146,34 +198,6 @@ def analyze_code():
         print(f"Error analyzing code: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    """Handle ipynb notebook file uploads and set it as current notebook context for agent"""
-    if not ml_agent:
-        return jsonify({"error": "Conversation agent not initialized"}), 500
-    try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in the request"}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        # Save the uploaded file
-        file_data = file.read()
-        file_path = save_uploaded_file(file_data, file.filename)
-        print(f"File uploaded and saved to: {file_path}")
-        if not file_path:
-            return jsonify({"error": "Failed to save uploaded file"}), 500
-        
-        # Set the uploaded notebook as current context for the agent
-        # ml_agent.problem_context = f"Uploaded notebook: {file_path}"
-        ml_agent.current_notebook = file_path
-        #pretty print the dict
-        return jsonify({"message": "File uploaded successfully", "file_path": file_path}), 200
-    except Exception as e:
-        print(f"Error processing file upload: {e}")
-        return jsonify({"error": str(e)}), 500
 
 @app.route('/visualize', methods=['GET'])
 def get_visualization_suggestions():

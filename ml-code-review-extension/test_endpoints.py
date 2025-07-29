@@ -46,7 +46,7 @@ def main():
 
     # test_analyze()
     # test_visualization()
-    # test_suggestions()
+    test_suggestions()
     # test_code()
     test_chat()
 if __name__ == "__main__":
