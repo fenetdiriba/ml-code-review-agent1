@@ -61,6 +61,12 @@ export class NotebookAnalyzer {
 
   private async sendNotebookAnalysisToBackend(analysis: NotebookAnalysis): Promise<void> {
     try {
+      // upload file to backend first
+      const active_notebook_url = this.notebookMonitor.getActiveNotebook()?.uri.toString();
+      if (active_notebook_url) {
+        console.log('Uploading active notebook to backend:', active_notebook_url);
+        await this.api.uploadFile(active_notebook_url);
+      }
       const result = await this.api.sendNotebookAnalysis(analysis);
       if (result.insights) {
         this.messageHandler.addMessage('assistant', `🔍 **Live Notebook Insights:**\n${result.insights}`);

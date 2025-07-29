@@ -42,27 +42,28 @@ export class NotebookMonitor {
 
   private setActiveNotebook(notebook: vscode.NotebookDocument) {
     this.activeNotebook = notebook;
+    console.log(`Active notebook set: ${notebook.uri.toString()}`);
     this.cellData.clear();
-    this.analyzeNotebook();
+    // this.analyzeNotebook();
   }
 
   private handleNotebookChange(event: vscode.NotebookDocumentChangeEvent) {
     // Handle cell content changes
-    for (const change of event.contentChanges) {
-      for (const cell of change.addedCells || []) {
-        this.updateCellData(cell);
-      }
-      for (const cell of change.removedCells || []) {
-        this.cellData.delete(cell.document.uri.toString());
-      }
-    }
+    // for (const change of event.contentChanges) {
+    //   for (const cell of change.addedCells || []) {
+    //     this.updateCellData(cell);
+    //   }
+    //   for (const cell of change.removedCells || []) {
+    //     this.cellData.delete(cell.document.uri.toString());
+    //   }
+    // }
     
-    // Handle cell output changes
-    for (const change of event.cellChanges) {
-      if (change.outputs) {
-        this.updateCellData(change.cell);
-      }
-    }
+    // // Handle cell output changes
+    // for (const change of event.cellChanges) {
+    //   if (change.outputs) {
+    //     this.updateCellData(change.cell);
+    //   }
+    // }
 
     this.notifyChange();
   }

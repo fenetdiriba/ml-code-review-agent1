@@ -12,7 +12,7 @@ import nbformat
 from pprint import pprint
 # Add the parent directory to the path to import agent.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from agent import ML_Assistant_Agent
+from agent import ML_Assistant_Agent, SuggestionItem, SuggestionsOutput, safe_serialize, PydanticOutputParser
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -172,7 +172,11 @@ def get_suggestions():
         
         # Get suggestions from the agent
         suggestions = ml_agent.get_suggestions(ml_agent.current_notebook_dict)
-        return jsonify({"suggestions": suggestions}), 200
+        # suggestions is a list of SuggestionItem objects
+        # Convert to JSON serializable format
+        suggestions_dicts = [item.__dict__ for item in suggestions]        
+
+        return jsonify(suggestions_dicts), 200
     except Exception as e:
         print(f"Error getting suggestions: {e}")
         return jsonify({"error": str(e)}), 500
@@ -215,7 +219,9 @@ def get_visualization_suggestions():
         # Get visualization suggestions from the agent
         print("Suggesting visualizations...")
         visualizations = ml_agent.suggest_visualizations(ml_agent.current_notebook_dict)
-        return jsonify({"visualizations": visualizations}), 200
+        # Convert to JSON serializable format
+        visualizations_dicts = [item.__dict__ for item in visualizations]        
+        return jsonify(visualizations_dicts), 200
     except Exception as e:
         print(f"Error getting visualization suggestions: {e}")
         return jsonify({"error": str(e)}), 500

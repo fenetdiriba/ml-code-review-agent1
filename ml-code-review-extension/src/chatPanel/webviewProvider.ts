@@ -919,20 +919,21 @@ export class WebviewProvider {
         });
 
         function displaySuggestions(suggestions) {
+            console.log('Displaying suggestions:', suggestions);
             const suggestionsContent = document.getElementById('suggestionsContent');
             if (!suggestionsContent) return;
 
-            if (!suggestions || !suggestions.suggestions || suggestions.suggestions.length === 0) {
+            if (!suggestions || suggestions.length === 0) {
                 suggestionsContent.innerHTML = '<div class="upload-prompt"><p>💡 No suggestions available. Try uploading a notebook first.</p></div>';
                 return;
             }
 
             let html = '';
-            suggestions.suggestions.forEach((suggestion, index) => {
+            suggestions.forEach((sug, index) => {
                 html += \`
-                    <div class="suggestion-item" onclick="selectSuggestion(\${index}, \${JSON.stringify(suggestion).replace(/"/g, '&quot;')})">
-                        <div class="suggestion-title">\${suggestion.title || 'Suggestion ' + (index + 1)}</div>
-                        <div class="suggestion-description">\${suggestion.description || suggestion.explanation || 'No description available'}</div>
+                    <div class="suggestion-item" onclick="selectSuggestion(\${index}, \${JSON.stringify(sug).replace(/"/g, '&quot;')})">
+                        <div class="suggestion-title">\${sug.suggestion || 'Suggestion ' + (index + 1)}</div>
+                        <div class="suggestion-description">\${sug.explanation || 'No description available'}</div>
                     </div>
                 \`;
             });

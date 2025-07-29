@@ -5,12 +5,35 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain.output_parsers import StructuredOutputParser
+from langchain.output_parsers import ResponseSchema
+from langchain.prompts import PromptTemplate
+from langchain.output_parsers import PydanticOutputParser
+from pydantic import BaseModel
+from typing import List
 import nbformat
 import json
 # Load environment variables from .env files
 _ = load_dotenv("../variables.env")
 _ = load_dotenv("secrets.env")
 API_KEY = os.environ.get("API_KEY")
+
+# Define a structured suggestion object
+class SuggestionItem(BaseModel):
+    suggestion: str
+    explanation: str
+
+# Define the overall return schema as a list of suggestions
+class SuggestionsOutput(BaseModel):
+    suggestions: List[SuggestionItem]
+
+class VisualizationItem(BaseModel):
+    visualization_type: str
+    description: str
+    why: str
+    
+class VisualizationOutput(BaseModel):
+    visualizations: List[VisualizationItem]
 
 class NvidiaLlamaAgent:
     """
@@ -200,7 +223,7 @@ class ML_Assistant_Agent:
                 history.append({"role": "system", "content": message.content})
         return history
 
-    def suggest_visualizations(self, notebook_dict: dict) -> str:
+    # def suggest_visualizations(self, notebook_dict: dict) -> str:
         """
         Suggest appropriate visualizations for the notebook data.
         
@@ -242,6 +265,7 @@ class ML_Assistant_Agent:
 
         return self.ask(prompt)
     
+        
     def read_notebook(self, file_path: str) -> dict:
         """
         Read ipynb notebook using nbformat and return its content as a dictionary.
@@ -339,59 +363,146 @@ class ML_Assistant_Agent:
             return True
         return False
     
-    def get_current_notebook_analysis(self) -> str:
+    def suggest_visualizations(self, notebook_dict: dict) -> List[VisualizationItem]:
         """
-        Get analysis of the currently loaded notebook.
+        Suggest appropriate visualizations for the notebook data.
         
+        Args:
+            notebook_dict (dict): Description of the data
+            
         Returns:
-            str: Analysis of current notebook or error message
+            List[VisualizationItem]: List of suggested visualizations
         """
-        if not self.current_notebook_dict:
-            return "No notebook currently loaded. Please upload a notebook first."
-        
-        return self.analyze_notebook(self.current_notebook_dict)
-    
+        if not notebook_dict:
+            return []
+
+         # Extract notebook context
+        old_notebook_string = "".join(self.notebook_history[:3])
+        notebook_string = safe_serialize(notebook_dict)
+
+
+
+        # Use LangChain's parser
+        visualization_parser = PydanticOutputParser(pydantic_object=VisualizationOutput)
+
+        format_instructions = visualization_parser.get_format_instructions()
+        # --- Keep your existing prompt logic ---
+        prompt = PromptTemplate(
+            input_variables=["notebook_string", "old_notebook_string"],
+            partial_variables={"format_instructions": format_instructions},
+            template="""
+        Here are our old notebooks: {old_notebook_string}
+        Please suggest visualizations for the following notebook data:
+        {notebook_string}
+        Focus on:
+        1. Key insights that can be visualized
+        2. Common visualization types for ML data
+        3. Any specific libraries or tools to use (e.g., matplotlib, seaborn, plotly)
+        Provide the response in JSON format with visualization types and descriptions.
+        example:
+            Provide specific Python code examples using matplotlib, seaborn, or plotly.
+            return response in JSON format example:
+            [
+                {{
+                    "visualization_type": "scatter_plot",
+                    "description": "Scatter plot of feature vs target variable",
+                    "why": "Useful for understanding relationships between features and target variable"
+                }},
+            ]
+        """
+        )
+        formatted_prompt = prompt.format(
+            notebook_string=notebook_string,
+            old_notebook_string=old_notebook_string
+        )
+        response = self.ask(formatted_prompt)
+
+
+        print("Response from model:", response)
+        try:
+            parsed = visualization_parser.parse(response)
+            return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
+        except Exception as e:
+            print("Parsing failed:", e)
+            return response
+
+
     def get_suggestions(self, notebook_dict: dict) -> str:
         """
         Get suggestions for improving the notebook's ML architecture.
-        
+
         Args:
             notebook_dict (dict): Notebook dictionary from read_notebook
-            
+
         Returns:
             str: Suggestions for improving the notebook
         """
         if not notebook_dict:
             return "Invalid notebook data"
+
+
+        # Extract notebook context
         old_notebook_string = "".join(self.notebook_history[:3])
-        # Extract relevant information from the notebook
         notebook_string = safe_serialize(notebook_dict)
-        prompt = f"""
+
+
+
+        # Use LangChain's parser
+        suggestion_parser = PydanticOutputParser(pydantic_object=SuggestionsOutput)
+
+        format_instructions = suggestion_parser.get_format_instructions()
+
+        # --- Keep your existing prompt logic ---
+        prompt = PromptTemplate(
+            input_variables=["notebook_string", "old_notebook_string"],
+            partial_variables={"format_instructions": format_instructions},
+            template="""
         Here are our old notebooks: {old_notebook_string}
 
         Please suggest improvements for the following notebook data:
         {notebook_string}
+
         Focus on:
-        1. Focus on how the current architecture is doing in terms of the outputs
-        2. ML best practices for our current problem, use very recent research
-        3. Data handling and preprocessing
-        4. Model implementation and evaluation
-        You are an agent that return in JSON format with list of suggestions and explanations.
-        ONLY return the suggestions and explanations, no other text.
-        Provide the response in JSON format with keys for each suggestion.
-        example:
-            Provide specific Python code examples using sklearn, pandas, or numpy.
-            return response in JSON format example:
-            [
-                {{"suggestion": "Use StandardScaler for feature scaling",
-                 "explanation": "StandardScaler normalizes features to have mean=0 and variance=1, improving model performance."}},
-                {{
-                 "suggestion": "Implement cross-validation for model evaluation",
-                 "explanation": "Cross-validation provides a more robust estimate of model performance by training on different subsets of data."}},
-            ]
+        1. Current outputs and model architecture.
+        2. ML best practices, with references to recent research.
+        3. Data handling and preprocessing.
+        4. Evaluation and tuning.
+
+        Only return a JSON object that matches this format:
+        {format_instructions}
+        I want you to return a JSON object with a list of suggestions and explanations. And only return the suggestions and explanations, no other text.
+        Example:
+        {{
+        "suggestions": [
+            {{
+            "suggestion": "Use StandardScaler for feature scaling",
+            "explanation": "StandardScaler normalizes features to have mean=0 and variance=1, improving model performance."
+            }},
+            {{
+            "suggestion": "Implement cross-validation",
+            "explanation": "It improves robustness by training on different subsets of the data."
+            }}
+        ]
+        }}
         """
-        return self.ask(prompt)
-    
+        )
+
+        formatted_prompt = prompt.format(
+            notebook_string=notebook_string,
+            old_notebook_string=old_notebook_string
+        )
+
+        response = self.ask(formatted_prompt)
+
+
+        print("Response from model:", response)
+        try:
+            parsed = suggestion_parser.parse(response)
+            return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
+        except Exception as e:
+            print("Parsing failed:", e)
+            return response
+
     def get_code(self, notebook_dict: dict, chosen_topic: str, chosen_option) -> str:
         """
         Given our current notebook and user's chosen topic, return the code cells related to that topic. 

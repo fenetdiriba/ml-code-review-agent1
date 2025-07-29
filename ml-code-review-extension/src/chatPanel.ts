@@ -135,10 +135,23 @@ export class ChatPanel {
     if (!panel) return;
 
     try {
-      const suggestions = await this.api.getSuggestions();
+      // send o
+      let active_notebook_url = this.notebookMonitor.getActiveNotebook()?.uri.toString();
+      
+      if (active_notebook_url) {
+        //remove 'file://' prefix if present
+        if (active_notebook_url.startsWith('file://')) {
+          active_notebook_url = active_notebook_url.substring(7);
+        }
+        // Upload the active notebook file to the backend
+        let response = await this.api.uploadFile(active_notebook_url);
+      }
+      
+      const response = await this.api.getSuggestions();
+  
       panel.webview.postMessage({
         type: 'suggestionsReceived',
-        data: suggestions
+        data: response
       });
     } catch (error) {
       console.error('Error getting suggestions:', error);
