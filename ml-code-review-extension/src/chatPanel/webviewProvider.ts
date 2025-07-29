@@ -413,6 +413,120 @@ export class WebviewProvider {
             font-size: 13px;
             line-height: 1.4;
         }
+        .suggestions-panel, .visualize-panel, .analyze-panel {
+            padding: 20px 0;
+        }
+        .analyze-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 0 0 20px 0;
+        }
+        .analyze-upload {
+            text-align: center;
+        }
+        .analyze-divider {
+            text-align: center;
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+        }
+        .analyze-divider::before,
+        .analyze-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--vscode-input-border);
+        }
+        .analyze-divider::before {
+            left: 0;
+        }
+        .analyze-divider::after {
+            right: 0;
+        }
+        .analyze-code-input {
+            padding: 0;
+        }
+        .analyze-code-input .code-input-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .suggestions-status, .visualize-status, .analyze-status {
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .suggestions-status h3, .visualize-status h3, .analyze-status h3 {
+            margin: 0 0 8px 0;
+            color: var(--vscode-textLink-foreground);
+        }
+        .suggestions-content, .visualize-content, .analyze-content {
+            background: var(--vscode-input-background);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 200px;
+        }
+        .upload-prompt {
+            text-align: center;
+            color: var(--vscode-descriptionForeground);
+            padding: 40px 20px;
+        }
+        .suggestion-item, .visualization-item {
+            background: var(--vscode-panel-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .suggestion-item:hover, .visualization-item:hover {
+            background: var(--vscode-list-hoverBackground);
+            transform: translateY(-1px);
+        }
+        .suggestion-title, .visualization-title {
+            font-weight: bold;
+            color: var(--vscode-textLink-foreground);
+            margin-bottom: 8px;
+        }
+        .suggestion-description, .visualization-description {
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--vscode-descriptionForeground);
+        }
+        .code-output {
+            background: var(--vscode-textCodeBlock-background);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+        .analysis-report {
+            background: var(--vscode-panel-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .analysis-report h4 {
+            margin: 0 0 12px 0;
+            color: var(--vscode-textLink-foreground);
+        }
+        .analysis-content {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--vscode-editor-foreground);
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -438,8 +552,9 @@ export class WebviewProvider {
         <div class="chat-input">
             <div class="input-tabs">
                 <button type="button" class="tab-btn active" id="chatTab">💬 Chat</button>
-                <button type="button" class="tab-btn" id="codeTab">📝 Code Analysis</button>
-                <button type="button" class="tab-btn" id="uploadTab">📁 Upload Files</button>
+                <button type="button" class="tab-btn" id="suggestionsTab">💡 Suggestions</button>
+                <button type="button" class="tab-btn" id="visualizeTab">📊 Visualize</button>
+                <button type="button" class="tab-btn" id="analyzeTab">🔍 Analyze</button>
                 <button type="button" class="tab-btn" id="notebookTab">📊 Live Notebook</button>
             </div>
             <form class="chat-input-form" id="chatForm">
@@ -451,40 +566,6 @@ export class WebviewProvider {
                 ></textarea>
                 <button type="submit" class="send-btn">Send</button>
             </form>
-            <form class="code-input-form hidden" id="codeForm">
-                <textarea 
-                    class="code-input-field" 
-                    id="codeInput" 
-                    placeholder="Paste your ML code here for analysis..."
-                    rows="8"
-                ></textarea>
-                <button type="submit" class="analyze-btn">Analyze Code</button>
-            </form>
-            <div class="upload-panel hidden" id="uploadPanel">
-                <div class="upload-buttons">
-                    <button type="button" class="upload-btn" id="uploadFileBtn">
-                        📄 Upload File
-                        <small>(.py, .ipynb, .txt, etc.)</small>
-                    </button>
-                    <button type="button" class="upload-btn" id="uploadImageBtn">
-                        🖼️ Upload Image
-                        <small>(.png, .jpg, .gif, etc.)</small>
-                    </button>
-                    <button type="button" class="upload-btn" id="uploadNotebookBtn">
-                        📓 Upload Notebook
-                        <small>(.ipynb files)</small>
-                    </button>
-                </div>
-                <div class="upload-info">
-                    <p>💡 <strong>Upload any file type:</strong></p>
-                    <ul>
-                        <li><strong>Code Files:</strong> .py, .js, .java, .cpp, .r</li>
-                        <li><strong>Notebooks:</strong> .ipynb files for analysis</li>
-                        <li><strong>Images:</strong> Screenshots, plots, diagrams</li>
-                        <li><strong>Documents:</strong> .txt, .md, .csv</li>
-                    </ul>
-                </div>
-            </div>
             <div class="notebook-panel hidden" id="notebookPanel">
                 <div class="notebook-status" id="notebookStatus">
                     <h3>📊 Live Notebook Monitor</h3>
@@ -519,6 +600,61 @@ export class WebviewProvider {
                     </ul>
                 </div>
             </div>
+            <div class="suggestions-panel hidden" id="suggestionsPanel">
+                <div class="suggestions-status">
+                    <h3>💡 ML Code Suggestions</h3>
+                    <p>Upload your notebook to get AI-powered improvement suggestions</p>
+                </div>
+                <div class="suggestions-content" id="suggestionsContent">
+                    <div class="upload-prompt">
+                        <p>📓 Please upload a notebook first to get suggestions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="visualize-panel hidden" id="visualizePanel">
+                <div class="visualize-status">
+                    <h3>📊 Data Visualization</h3>
+                    <p>Upload your notebook to get visualization suggestions</p>
+                </div>
+                <div class="visualize-content" id="visualizeContent">
+                    <div class="upload-prompt">
+                        <p>📓 Please upload a notebook first to get visualization options</p>
+                    </div>
+                </div>
+            </div>
+            <div class="analyze-panel hidden" id="analyzePanel">
+                <div class="analyze-status">
+                    <h3>🔍 Code Analysis</h3>
+                    <p>Upload a notebook or paste code for detailed analysis</p>
+                </div>
+                <div class="analyze-options">
+                    <div class="analyze-upload">
+                        <button type="button" class="upload-btn" id="analyzeUploadNotebookBtn">
+                            📓 Upload Notebook
+                            <small>(.ipynb files)</small>
+                        </button>
+                    </div>
+                    <div class="analyze-divider">
+                        <span>or</span>
+                    </div>
+                    <div class="analyze-code-input">
+                        <form class="code-input-form" id="analyzeCodeForm">
+                            <textarea 
+                                class="code-input-field" 
+                                id="analyzeCodeInput" 
+                                placeholder="Paste your ML code here for analysis..."
+                                rows="6"
+                            ></textarea>
+                            <button type="submit" class="analyze-btn">Analyze Code</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="analyze-content" id="analyzeContent">
+                    <div class="upload-prompt">
+                        <p>👆 Upload a notebook or paste code above to get detailed analysis</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -528,15 +664,7 @@ export class WebviewProvider {
         const messageInput = document.getElementById('messageInput');
         const chatForm = document.getElementById('chatForm');
         const clearButton = document.getElementById('clearBtn');
-        const codeInput = document.getElementById('codeInput');
-        const codeForm = document.getElementById('codeForm');
         const chatTab = document.getElementById('chatTab');
-        const codeTab = document.getElementById('codeTab');
-        const uploadTab = document.getElementById('uploadTab');
-        const uploadPanel = document.getElementById('uploadPanel');
-        const uploadFileBtn = document.getElementById('uploadFileBtn');
-        const uploadImageBtn = document.getElementById('uploadImageBtn');
-        const uploadNotebookBtn = document.getElementById('uploadNotebookBtn');
         const notebookTab = document.getElementById('notebookTab');
         const notebookPanel = document.getElementById('notebookPanel');
         const analyzeNotebookBtn = document.getElementById('analyzeNotebookBtn');
@@ -544,6 +672,15 @@ export class WebviewProvider {
         const showVariablesBtn = document.getElementById('showVariablesBtn');
         const getLiveVariablesBtn = document.getElementById('getLiveVariablesBtn');
         const showPlotsBtn = document.getElementById('showPlotsBtn');
+        const suggestionsTab = document.getElementById('suggestionsTab');
+        const visualizeTab = document.getElementById('visualizeTab');
+        const analyzeTab = document.getElementById('analyzeTab');
+        const suggestionsPanel = document.getElementById('suggestionsPanel');
+        const visualizePanel = document.getElementById('visualizePanel');
+        const analyzePanel = document.getElementById('analyzePanel');
+        const analyzeUploadNotebookBtn = document.getElementById('analyzeUploadNotebookBtn');
+        const analyzeCodeForm = document.getElementById('analyzeCodeForm');
+        const analyzeCodeInput = document.getElementById('analyzeCodeInput');
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
@@ -576,86 +713,84 @@ export class WebviewProvider {
         clearButton.addEventListener('click', clearChat);
         
         // Tab switching
-        chatTab.addEventListener('click', function() {
-            chatTab.classList.add('active');
-            codeTab.classList.remove('active');
-            uploadTab.classList.remove('active');
-            notebookTab.classList.remove('active');
-            chatForm.classList.remove('hidden');
-            codeForm.classList.add('hidden');
-            uploadPanel.classList.add('hidden');
+        function hideAllPanels() {
+            chatForm.classList.add('hidden');
             notebookPanel.classList.add('hidden');
+            suggestionsPanel.classList.add('hidden');
+            visualizePanel.classList.add('hidden');
+            analyzePanel.classList.add('hidden');
+        }
+
+        function deactivateAllTabs() {
+            chatTab.classList.remove('active');
+            notebookTab.classList.remove('active');
+            suggestionsTab.classList.remove('active');
+            visualizeTab.classList.remove('active');
+            analyzeTab.classList.remove('active');
+        }
+
+        chatTab.addEventListener('click', function() {
+            deactivateAllTabs();
+            hideAllPanels();
+            chatTab.classList.add('active');
+            chatForm.classList.remove('hidden');
             messageInput.focus();
         });
         
-        codeTab.addEventListener('click', function() {
-            codeTab.classList.add('active');
-            chatTab.classList.remove('active');
-            uploadTab.classList.remove('active');
-            notebookTab.classList.remove('active');
-            codeForm.classList.remove('hidden');
-            chatForm.classList.add('hidden');
-            uploadPanel.classList.add('hidden');
-            notebookPanel.classList.add('hidden');
-            codeInput.focus();
-        });
-        
-        uploadTab.addEventListener('click', function() {
-            uploadTab.classList.add('active');
-            chatTab.classList.remove('active');
-            codeTab.classList.remove('active');
-            notebookTab.classList.remove('active');
-            uploadPanel.classList.remove('hidden');
-            chatForm.classList.add('hidden');
-            codeForm.classList.add('hidden');
-            notebookPanel.classList.add('hidden');
-        });
-        
         notebookTab.addEventListener('click', function() {
+            deactivateAllTabs();
+            hideAllPanels();
             notebookTab.classList.add('active');
-            chatTab.classList.remove('active');
-            codeTab.classList.remove('active');
-            uploadTab.classList.remove('active');
             notebookPanel.classList.remove('hidden');
-            chatForm.classList.add('hidden');
-            codeForm.classList.add('hidden');
-            uploadPanel.classList.add('hidden');
+        });
+
+        suggestionsTab.addEventListener('click', function() {
+            deactivateAllTabs();
+            hideAllPanels();
+            suggestionsTab.classList.add('active');
+            suggestionsPanel.classList.remove('hidden');
+        });
+
+        visualizeTab.addEventListener('click', function() {
+            deactivateAllTabs();
+            hideAllPanels();
+            visualizeTab.classList.add('active');
+            visualizePanel.classList.remove('hidden');
+        });
+
+        analyzeTab.addEventListener('click', function() {
+            deactivateAllTabs();
+            hideAllPanels();
+            analyzeTab.classList.add('active');
+            analyzePanel.classList.remove('hidden');
+            // Focus on code input for better UX
+            setTimeout(() => analyzeCodeInput.focus(), 100);
         });
         
-        // Handle code analysis
-        codeForm.addEventListener('submit', function(e) {
+        // Handle analyze code form submission
+        analyzeCodeForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const code = codeInput.value.trim();
+            const code = analyzeCodeInput.value.trim();
             if (!code) return;
             
-            const message = \`Please analyze this ML code:\\n\\n\\\`\\\`\\\`python\\n\${code}\\n\\\`\\\`\\\`\`;
+            // Show loading state
+            const analyzeContent = document.getElementById('analyzeContent');
+            if (analyzeContent) {
+                analyzeContent.innerHTML = '<div class="upload-prompt"><p>🔄 Analyzing your code...</p></div>';
+            }
             
+            // Directly trigger analysis using the analysis endpoint
             vscode.postMessage({
-                type: 'sendMessage',
-                content: message
+                type: 'analyzeCode',
+                data: { code: code }
             });
             
-            codeInput.value = '';
-            
-            // Switch back to chat tab to see response
-            chatTab.click();
+            analyzeCodeInput.value = '';
         });
         
-        // Upload button handlers
-        uploadFileBtn.addEventListener('click', function() {
-            vscode.postMessage({
-                type: 'uploadFile'
-            });
-        });
-        
-        uploadImageBtn.addEventListener('click', function() {
-            vscode.postMessage({
-                type: 'uploadImage'
-            });
-        });
-        
-        uploadNotebookBtn.addEventListener('click', function() {
+        // Analyze upload button handler
+        analyzeUploadNotebookBtn.addEventListener('click', function() {
             vscode.postMessage({
                 type: 'uploadNotebook'
             });
@@ -692,9 +827,58 @@ export class WebviewProvider {
             });
         });
         
-        // Listen for notebook connection updates
+        // Handle suggestions panel interactions
+        function loadSuggestions() {
+            const suggestionsContent = document.getElementById('suggestionsContent');
+            if (suggestionsContent) {
+                suggestionsContent.innerHTML = '<div class="upload-prompt"><p>🔄 Loading suggestions...</p></div>';
+            }
+            vscode.postMessage({ type: 'getSuggestions' });
+        }
+
+        function loadVisualizations() {
+            const visualizeContent = document.getElementById('visualizeContent');
+            if (visualizeContent) {
+                visualizeContent.innerHTML = '<div class="upload-prompt"><p>🔄 Loading visualizations...</p></div>';
+            }
+            vscode.postMessage({ type: 'getVisualizations' });
+        }
+
+        function loadAnalysis() {
+            const analyzeContent = document.getElementById('analyzeContent');
+            if (analyzeContent) {
+                analyzeContent.innerHTML = '<div class="upload-prompt"><p>🔄 Loading analysis...</p></div>';
+            }
+            vscode.postMessage({ type: 'getAnalysis' });
+        }
+
+        // Auto-load content when switching to tabs (if content is empty)
+        suggestionsTab.addEventListener('click', function() {
+            const suggestionsContent = document.getElementById('suggestionsContent');
+            if (suggestionsContent && suggestionsContent.innerHTML.includes('upload a notebook first')) {
+                loadSuggestions();
+            }
+        });
+
+        visualizeTab.addEventListener('click', function() {
+            const visualizeContent = document.getElementById('visualizeContent');
+            if (visualizeContent && visualizeContent.innerHTML.includes('upload a notebook first')) {
+                loadVisualizations();
+            }
+        });
+
+        analyzeTab.addEventListener('click', function() {
+            const analyzeContent = document.getElementById('analyzeContent');
+            if (analyzeContent && analyzeContent.innerHTML.includes('upload a notebook first')) {
+                // Don't auto-load analysis - user needs to upload notebook first
+                // The upload button is now in the analyze tab
+            }
+        });
+
+        // Listen for backend responses and notebook connection updates
         window.addEventListener('message', function(event) {
             const message = event.data;
+            
             if (message.type === 'updateNotebookConnection') {
                 const connectionElement = document.getElementById('notebookConnection');
                 if (connectionElement) {
@@ -702,7 +886,212 @@ export class WebviewProvider {
                     connectionElement.className = 'notebook-connection ' + (message.data.connected ? 'connected' : 'disconnected');
                 }
             }
+            
+            else if (message.type === 'suggestionsReceived') {
+                displaySuggestions(message.data);
+            }
+            else if (message.type === 'suggestionsError') {
+                displaySuggestionsError(message.data.error);
+            }
+            
+            else if (message.type === 'visualizationsReceived') {
+                displayVisualizations(message.data);
+            }
+            else if (message.type === 'visualizationsError') {
+                displayVisualizationsError(message.data.error);
+            }
+            
+            else if (message.type === 'analysisReceived') {
+                displayAnalysis(message.data);
+                // Auto-switch to analyze tab to show results
+                analyzeTab.click();
+            }
+            else if (message.type === 'analysisError') {
+                displayAnalysisError(message.data.error);
+            }
+            
+            else if (message.type === 'codeGenerated') {
+                displayGeneratedCode(message.data);
+            }
+            else if (message.type === 'codeGenerationError') {
+                displayCodeGenerationError(message.data.error);
+            }
         });
+
+        function displaySuggestions(suggestions) {
+            const suggestionsContent = document.getElementById('suggestionsContent');
+            if (!suggestionsContent) return;
+
+            if (!suggestions || !suggestions.suggestions || suggestions.suggestions.length === 0) {
+                suggestionsContent.innerHTML = '<div class="upload-prompt"><p>💡 No suggestions available. Try uploading a notebook first.</p></div>';
+                return;
+            }
+
+            let html = '';
+            suggestions.suggestions.forEach((suggestion, index) => {
+                html += \`
+                    <div class="suggestion-item" onclick="selectSuggestion(\${index}, \${JSON.stringify(suggestion).replace(/"/g, '&quot;')})">
+                        <div class="suggestion-title">\${suggestion.title || 'Suggestion ' + (index + 1)}</div>
+                        <div class="suggestion-description">\${suggestion.description || suggestion.explanation || 'No description available'}</div>
+                    </div>
+                \`;
+            });
+            suggestionsContent.innerHTML = html;
+        }
+
+        function displaySuggestionsError(error) {
+            const suggestionsContent = document.getElementById('suggestionsContent');
+            if (suggestionsContent) {
+                suggestionsContent.innerHTML = \`<div class="upload-prompt"><p>❌ Error loading suggestions: \${error}</p></div>\`;
+            }
+        }
+
+        function displayVisualizations(visualizations) {
+            const visualizeContent = document.getElementById('visualizeContent');
+            if (!visualizeContent) return;
+
+            if (!visualizations || !visualizations.visualizations || visualizations.visualizations.length === 0) {
+                visualizeContent.innerHTML = '<div class="upload-prompt"><p>📊 No visualizations available. Try uploading a notebook first.</p></div>';
+                return;
+            }
+
+            let html = '';
+            visualizations.visualizations.forEach((viz, index) => {
+                html += \`
+                    <div class="visualization-item" onclick="selectVisualization(\${index}, \${JSON.stringify(viz).replace(/"/g, '&quot;')})">
+                        <div class="visualization-title">\${viz.title || 'Visualization ' + (index + 1)}</div>
+                        <div class="visualization-description">\${viz.description || viz.explanation || 'No description available'}</div>
+                    </div>
+                \`;
+            });
+            visualizeContent.innerHTML = html;
+        }
+
+        function displayVisualizationsError(error) {
+            const visualizeContent = document.getElementById('visualizeContent');
+            if (visualizeContent) {
+                visualizeContent.innerHTML = \`<div class="upload-prompt"><p>❌ Error loading visualizations: \${error}</p></div>\`;
+            }
+        }
+
+        function displayAnalysis(analysis) {
+            const analyzeContent = document.getElementById('analyzeContent');
+            if (!analyzeContent) return;
+
+            if (!analysis || !analysis.analysis) {
+                analyzeContent.innerHTML = '<div class="upload-prompt"><p>🔍 No analysis available. Please upload a notebook using the button above.</p></div>';
+                return;
+            }
+
+            let html = \`
+                <div class="analysis-report">
+                    <h4>📊 Detailed Analysis Report</h4>
+                    <div class="analysis-content">
+                        \${typeof analysis.analysis === 'string' ? analysis.analysis.replace(/\\n/g, '<br>') : JSON.stringify(analysis.analysis, null, 2)}
+                    </div>
+                </div>
+            \`;
+            analyzeContent.innerHTML = html;
+        }
+
+        function displayAnalysisError(error) {
+            const analyzeContent = document.getElementById('analyzeContent');
+            if (analyzeContent) {
+                analyzeContent.innerHTML = \`
+                    <div class="upload-prompt">
+                        <p>❌ Error loading analysis: \${error}</p>
+                    </div>
+                    <div class="analyze-divider">
+                        <span>Try manual code analysis instead</span>
+                    </div>
+                    <div class="analyze-code-input">
+                        <form class="code-input-form" id="fallbackCodeForm">
+                            <textarea 
+                                class="code-input-field" 
+                                id="fallbackCodeInput" 
+                                placeholder="Paste your ML code here for analysis..."
+                                rows="6"
+                            ></textarea>
+                            <button type="submit" class="analyze-btn">Analyze Code</button>
+                        </form>
+                    </div>
+                \`;
+                
+                // Add event listener for the fallback form
+                const fallbackForm = document.getElementById('fallbackCodeForm');
+                const fallbackInput = document.getElementById('fallbackCodeInput');
+                
+                if (fallbackForm && fallbackInput) {
+                    fallbackForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const code = fallbackInput.value.trim();
+                        if (!code) return;
+                        
+                        // Show loading state
+                        analyzeContent.innerHTML = '<div class="upload-prompt"><p>🔄 Analyzing your code...</p></div>';
+                        
+                        // Directly trigger analysis using the analysis endpoint
+                        vscode.postMessage({
+                            type: 'analyzeCode',
+                            data: { code: code }
+                        });
+                        
+                        fallbackInput.value = '';
+                    });
+                }
+            }
+        }
+
+        function selectSuggestion(index, suggestion) {
+            vscode.postMessage({
+                type: 'generateCode',
+                data: { suggestion: suggestion, type: 'suggestion' }
+            });
+        }
+
+        function selectVisualization(index, visualization) {
+            vscode.postMessage({
+                type: 'generateCode',
+                data: { suggestion: visualization, type: 'visualization' }
+            });
+        }
+
+        function displayGeneratedCode(codeData) {
+            const currentTab = document.querySelector('.tab-btn.active');
+            let targetContent;
+            
+            if (currentTab && currentTab.id === 'suggestionsTab') {
+                targetContent = document.getElementById('suggestionsContent');
+            } else if (currentTab && currentTab.id === 'visualizeTab') {
+                targetContent = document.getElementById('visualizeContent');
+            }
+            
+            if (targetContent) {
+                const codeHtml = \`
+                    <div class="code-output">
+                        <h4>Generated Code:</h4>
+                        <pre><code>\${codeData.code || JSON.stringify(codeData, null, 2)}</code></pre>
+                    </div>
+                \`;
+                targetContent.innerHTML += codeHtml;
+            }
+        }
+
+        function displayCodeGenerationError(error) {
+            const currentTab = document.querySelector('.tab-btn.active');
+            let targetContent;
+            
+            if (currentTab && currentTab.id === 'suggestionsTab') {
+                targetContent = document.getElementById('suggestionsContent');
+            } else if (currentTab && currentTab.id === 'visualizeTab') {
+                targetContent = document.getElementById('visualizeContent');
+            }
+            
+            if (targetContent) {
+                targetContent.innerHTML += \`<div class="upload-prompt"><p>❌ Error generating code: \${error}</p></div>\`;
+            }
+        }
         
         // Focus on input
         messageInput.focus();

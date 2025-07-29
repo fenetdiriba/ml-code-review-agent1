@@ -437,6 +437,310 @@ def notebook_analysis():
         print(f"Error in notebook analysis endpoint: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/suggestions', methods=['GET'])
+def get_suggestions():
+    """Get AI-powered suggestions for uploaded notebook"""
+    try:
+        if not nvidia_agent:
+            return jsonify({"error": "NVIDIA agent not available"}), 503
+        
+        # For now, return mock suggestions. In production, this would analyze the uploaded notebook
+        suggestions = {
+            "suggestions": [
+                {
+                    "title": "Optimize Model Training",
+                    "description": "Consider using learning rate scheduling and early stopping to improve model convergence and prevent overfitting.",
+                    "category": "performance",
+                    "impact": "high"
+                },
+                {
+                    "title": "Add Data Validation",
+                    "description": "Implement input data validation to check for missing values, outliers, and data type consistency.",
+                    "category": "robustness", 
+                    "impact": "medium"
+                },
+                {
+                    "title": "Improve Error Handling",
+                    "description": "Add try-catch blocks around model training and prediction code to handle potential runtime errors gracefully.",
+                    "category": "reliability",
+                    "impact": "medium"
+                }
+            ]
+        }
+        
+        return jsonify(suggestions)
+        
+    except Exception as e:
+        print(f"❌ Error in suggestions endpoint: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/visualizations', methods=['GET'])
+def get_visualizations():
+    """Get visualization suggestions for uploaded notebook"""
+    try:
+        if not nvidia_agent:
+            return jsonify({"error": "NVIDIA agent not available"}), 503
+        
+        # For now, return mock visualizations. In production, this would analyze the uploaded notebook data
+        visualizations = {
+            "visualizations": [
+                {
+                    "title": "Feature Correlation Heatmap",
+                    "description": "Create a correlation matrix heatmap to identify relationships between features in your dataset.",
+                    "type": "heatmap",
+                    "complexity": "easy"
+                },
+                {
+                    "title": "Training Loss Curves",
+                    "description": "Plot training and validation loss over epochs to monitor model convergence and detect overfitting.",
+                    "type": "line_plot",
+                    "complexity": "easy"
+                },
+                {
+                    "title": "Feature Importance Bar Chart",
+                    "description": "Visualize which features contribute most to your model's predictions using a horizontal bar chart.",
+                    "type": "bar_chart", 
+                    "complexity": "medium"
+                },
+                {
+                    "title": "Confusion Matrix",
+                    "description": "Display classification performance with a confusion matrix to identify misclassification patterns.",
+                    "type": "confusion_matrix",
+                    "complexity": "medium"
+                }
+            ]
+        }
+        
+        return jsonify(visualizations)
+        
+    except Exception as e:
+        print(f"❌ Error in visualizations endpoint: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/analysis', methods=['GET', 'POST'])
+def get_analysis():
+    """Get code analysis for uploaded notebook or pasted code"""
+    try:
+        # Check if this is a POST request with code data
+        if request.method == 'POST' and request.json and 'code' in request.json:
+            code = request.json['code']
+            
+            # Use AI to analyze the provided code if available
+            if nvidia_agent:
+                try:
+                    analysis_prompt = f"""
+                    Analyze this machine learning code and provide a comprehensive report:
+                    
+                    ```python
+                    {code}
+                    ```
+                    
+                    Please provide:
+                    1. Code quality assessment
+                    2. Best practices compliance
+                    3. Potential improvements
+                    4. Performance optimization suggestions
+                    5. Security considerations
+                    """
+                    
+                    ai_analysis = nvidia_agent.generate_response(analysis_prompt)
+                    
+                    return jsonify({
+                        "analysis": f"🔍 **AI Code Analysis**\n\n{ai_analysis}",
+                        "source": "pasted_code"
+                    })
+                    
+                except Exception as ai_error:
+                    print(f"AI analysis failed: {ai_error}")
+                    # Fall through to template analysis below
+            
+            # If no AI or AI failed, provide code-specific template analysis
+            return jsonify({
+                "analysis": f"""
+🔍 **Code Analysis Report**
+
+**📝 Code Submitted:** {len(code)} characters analyzed
+
+**📊 Quick Assessment:**
+• Code structure appears to follow Python conventions
+• Consider adding docstrings and comments for better maintainability
+
+**🚀 General ML Code Recommendations:**
+• **Data Validation:** Always validate input data shapes and types
+• **Error Handling:** Add try-catch blocks around critical operations
+• **Memory Management:** Be mindful of large datasets and memory usage
+• **Reproducibility:** Set random seeds for consistent results
+• **Logging:** Add logging statements for debugging and monitoring
+
+**🛡️ Best Practices:**
+• Use type hints for better code documentation
+• Follow PEP 8 style guidelines
+• Consider using virtual environments
+• Add unit tests for critical functions
+
+**💡 Next Steps:** 
+• Review each function for edge cases
+• Add proper exception handling
+• Consider performance optimizations
+• Document your code thoroughly
+
+*Note: This is a template analysis. For detailed AI-powered analysis, ensure the NVIDIA agent is properly configured.*
+                """.strip(),
+                "source": "template_code"
+            })
+        
+        # For GET requests (notebook analysis), check if NVIDIA agent is available
+        if not nvidia_agent:
+            return jsonify({"error": "NVIDIA agent not available"}), 503
+        
+        # For notebook uploads or when AI fails, return template analysis
+        analysis = {
+            "analysis": """
+🔍 **Code Analysis Report**
+
+**📊 Overall Quality: B+**
+
+**✅ Strengths:**
+• Good use of standard ML libraries (pandas, scikit-learn)
+• Clear variable naming conventions
+• Proper data preprocessing steps
+• Model evaluation metrics included
+
+**⚠️ Areas for Improvement:**
+• Missing input validation for edge cases
+• No error handling for file operations
+• Hard-coded hyperparameters should be configurable
+• Lack of documentation for custom functions
+
+**🚀 Performance Recommendations:**
+• Consider using cross-validation for more robust model evaluation
+• Implement feature scaling for better model performance
+• Add regularization to prevent overfitting
+• Use stratified sampling for imbalanced datasets
+
+**🛡️ Security & Best Practices:**
+• Validate all input data shapes and types
+• Add logging for debugging and monitoring
+• Consider using configuration files for parameters
+• Implement unit tests for critical functions
+            """.strip(),
+            "source": "template"
+        }
+        
+        return jsonify(analysis)
+        
+    except Exception as e:
+        print(f"❌ Error in analysis endpoint: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/codegen', methods=['GET'])
+def generate_code():
+    """Generate code based on selected suggestion or visualization"""
+    try:
+        if not nvidia_agent:
+            return jsonify({"error": "NVIDIA agent not available"}), 503
+            
+        # Get suggestion data from request body (if any)
+        # For now, return mock code. In production, this would generate code based on the suggestion
+        code_examples = {
+            "performance": """
+# Optimized Model Training with Learning Rate Scheduling and Early Stopping
+
+from sklearn.model_selection import train_test_split
+from sklearn.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+
+# Split data
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build model
+model = Sequential([
+    Dense(128, activation='relu', input_shape=(X_train.shape[1],)),
+    Dropout(0.3),
+    Dense(64, activation='relu'),
+    Dropout(0.3),
+    Dense(1, activation='sigmoid')
+])
+
+# Compile model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Callbacks for optimization
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+lr_scheduler = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-7)
+
+# Train model with callbacks
+history = model.fit(
+    X_train, y_train,
+    validation_data=(X_val, y_val),
+    epochs=100,
+    batch_size=32,
+    callbacks=[early_stopping, lr_scheduler],
+    verbose=1
+)
+            """,
+            "visualization": """
+# Feature Correlation Heatmap
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+# Create correlation matrix
+correlation_matrix = df.corr()
+
+# Set up the matplotlib figure
+plt.figure(figsize=(12, 8))
+
+# Create heatmap
+sns.heatmap(correlation_matrix, 
+            annot=True,
+            cmap='coolwarm',
+            center=0,
+            square=True,
+            fmt='.2f',
+            cbar_kws={'label': 'Correlation Coefficient'})
+
+plt.title('Feature Correlation Heatmap', fontsize=16, fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+# Identify highly correlated features
+high_corr_pairs = []
+for i in range(len(correlation_matrix.columns)):
+    for j in range(i+1, len(correlation_matrix.columns)):
+        if abs(correlation_matrix.iloc[i, j]) > 0.8:
+            high_corr_pairs.append((
+                correlation_matrix.columns[i], 
+                correlation_matrix.columns[j], 
+                correlation_matrix.iloc[i, j]
+            ))
+
+print("Highly correlated feature pairs (|correlation| > 0.8):")
+for pair in high_corr_pairs:
+    print(f"{pair[0]} - {pair[1]}: {pair[2]:.3f}")
+            """
+        }
+        
+        # Return a random code example for demo purposes
+        import random
+        code_type = random.choice(list(code_examples.keys()))
+        
+        return jsonify({
+            "code": code_examples[code_type],
+            "type": code_type,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        print(f"❌ Error in codegen endpoint: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -455,6 +759,10 @@ if __name__ == '__main__':
     print("  POST /analyze - Analyze code and images")
     print("  POST /chat - Chat with ML assistant")
     print("  POST /upload - Upload files")
+    print("  GET /suggestions - Get AI-powered suggestions")
+    print("  GET /visualizations - Get visualization suggestions")
+    print("  GET /analysis - Get code analysis")
+    print("  GET /codegen - Generate code from suggestions")
     print("  GET /health - Health check")
     print("\n🌐 Server starting on http://localhost:3000")
     

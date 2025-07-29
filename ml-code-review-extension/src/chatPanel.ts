@@ -17,6 +17,7 @@ export class ChatPanel {
   private notebookAnalyzer: NotebookAnalyzer;
   private variableInspector: VariableInspector;
   private webviewProvider: WebviewProvider;
+  private lastNotebookPath: string | undefined;
 
   constructor(api: BackendAPI, context: vscode.ExtensionContext) {
     this.api = api;
@@ -64,6 +65,8 @@ export class ChatPanel {
         case 'uploadNotebook':
           await this.fileUploadHandler.handleUploadNotebook();
           this.updateWebview();
+          // Auto-trigger analysis if upload was successful and we're in analyze context
+          await this.autoTriggerAnalysisAfterUpload();
           break;
         case 'analyzeActiveNotebook':
           await this.notebookAnalyzer.handleAnalyzeActiveNotebook();
@@ -85,11 +88,35 @@ export class ChatPanel {
           await this.variableInspector.handleGetLiveVariables();
           this.updateWebview();
           break;
+        case 'getSuggestions':
+          await this.handleGetSuggestions();
+          break;
+        case 'getVisualizations':
+          await this.handleGetVisualizations();
+          break;
+        case 'getAnalysis':
+          await this.handleGetAnalysis();
+          break;
+        case 'generateCode':
+          await this.handleGenerateCode(message.data);
+          break;
+        case 'analyzeCode':
+          await this.handleAnalyzeCode(message.data);
+          break;
       }
     });
   }
 
   private handleNotebookAnalysis(analysis: NotebookAnalysis) {
+    // Check if we have a new notebook and clear reported items if so
+    const currentNotebook = this.notebookMonitor.getActiveNotebook();
+    const currentNotebookPath = currentNotebook?.uri.path;
+    
+    if (this.lastNotebookPath !== currentNotebookPath) {
+      this.lastNotebookPath = currentNotebookPath;
+      this.notebookAnalyzer.clearReportedItems();
+    }
+    
     this.notebookAnalyzer.handleNotebookAnalysis(analysis);
     this.updateNotebookConnectionDisplay();
     this.updateWebview();
@@ -101,6 +128,126 @@ export class ChatPanel {
 
   private updateNotebookConnectionDisplay() {
     this.webviewProvider.updateNotebookConnectionDisplay();
+  }
+
+  private async handleGetSuggestions() {
+    const panel = this.webviewProvider.getPanel();
+    if (!panel) return;
+
+    try {
+      const suggestions = await this.api.getSuggestions();
+      panel.webview.postMessage({
+        type: 'suggestionsReceived',
+        data: suggestions
+      });
+    } catch (error) {
+      console.error('Error getting suggestions:', error);
+      panel.webview.postMessage({
+        type: 'suggestionsError',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' }
+      });
+    }
+  }
+
+  private async handleGetVisualizations() {
+    const panel = this.webviewProvider.getPanel();
+    if (!panel) return;
+
+    try {
+      const visualizations = await this.api.getVisualizations();
+      panel.webview.postMessage({
+        type: 'visualizationsReceived',
+        data: visualizations
+      });
+    } catch (error) {
+      console.error('Error getting visualizations:', error);
+      panel.webview.postMessage({
+        type: 'visualizationsError',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' }
+      });
+    }
+  }
+
+  private async handleGetAnalysis() {
+    const panel = this.webviewProvider.getPanel();
+    if (!panel) return;
+
+    try {
+      const analysis = await this.api.getAnalysis();
+      panel.webview.postMessage({
+        type: 'analysisReceived',
+        data: analysis
+      });
+    } catch (error) {
+      console.error('Error getting analysis:', error);
+      panel.webview.postMessage({
+        type: 'analysisError',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' }
+      });
+    }
+  }
+
+  private async handleGenerateCode(suggestionData: any) {
+    const panel = this.webviewProvider.getPanel();
+    if (!panel) return;
+
+    try {
+      const code = await this.api.generateCode(suggestionData);
+      panel.webview.postMessage({
+        type: 'codeGenerated',
+        data: code
+      });
+    } catch (error) {
+      console.error('Error generating code:', error);
+      panel.webview.postMessage({
+        type: 'codeGenerationError',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' }
+      });
+    }
+  }
+
+  private async autoTriggerAnalysisAfterUpload() {
+    // Small delay to ensure upload processing is complete
+    setTimeout(async () => {
+      try {
+        await this.handleGetAnalysis();
+      } catch (error) {
+        console.error('Auto-analysis failed:', error);
+      }
+    }, 1000);
+  }
+
+  private async handleAnalyzeCode(data: { code: string }) {
+    const panel = this.webviewProvider.getPanel();
+    if (!panel) return;
+
+    try {
+      // Add the code to chat for context
+      this.messageHandler.addMessage('user', `🔍 Analyzing code:\n\`\`\`python\n${data.code.substring(0, 200)}${data.code.length > 200 ? '...' : ''}\n\`\`\``);
+      
+      // Get analysis from backend with the provided code
+      const analysis = await this.api.getAnalysis(data.code);
+      
+      // Send analysis result to the analyze tab
+      panel.webview.postMessage({
+        type: 'analysisReceived',
+        data: analysis
+      });
+      
+      // Also add to chat for history
+      this.messageHandler.addMessage('assistant', `✅ Code analysis completed. Check the Analyze tab for detailed results.`);
+      this.updateWebview();
+      
+    } catch (error) {
+      console.error('Error analyzing code:', error);
+      panel.webview.postMessage({
+        type: 'analysisError',
+        data: { error: error instanceof Error ? error.message : 'Unknown error' }
+      });
+      
+      this.messageHandler.addMessage('assistant', `❌ Code analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.updateWebview();
+    }
   }
 
   public dispose() {

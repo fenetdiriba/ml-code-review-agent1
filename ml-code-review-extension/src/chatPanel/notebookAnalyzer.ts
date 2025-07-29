@@ -10,6 +10,8 @@ export class NotebookAnalyzer {
   private notebookMonitor: NotebookMonitor;
   private messageHandler: MessageHandler;
   private currentNotebookAnalysis: NotebookAnalysis | undefined;
+  private reportedErrors: Set<string> = new Set();
+  private reportedPlots: Set<string> = new Set();
 
   constructor(
     api: BackendAPI, 
@@ -26,16 +28,31 @@ export class NotebookAnalyzer {
   public handleNotebookAnalysis(analysis: NotebookAnalysis): void {
     this.currentNotebookAnalysis = analysis;
     
-    // Auto-notify about errors
-    if (analysis.errors.length > 0) {
-      const errorMessage = `🚨 **Notebook Errors Detected:**\n${analysis.errors.map(err => `• ${err.substring(0, 100)}...`).join('\n')}`;
+    // Only report new errors
+    const newErrors = analysis.errors.filter(error => !this.reportedErrors.has(error));
+    if (newErrors.length > 0) {
+      const errorMessage = `🚨 **New Notebook Errors Detected:**\n${newErrors.map(err => `• ${err.substring(0, 100)}...`).join('\n')}`;
       this.messageHandler.addMessage('assistant', errorMessage);
+      
+      // Add new errors to reported set
+      newErrors.forEach(error => this.reportedErrors.add(error));
     }
 
-    // Auto-notify about new plots
-    if (analysis.plots.length > 0) {
-      const plotMessage = `📊 **New Visualization Detected:**\n${analysis.plots.length} plot(s) generated in cells: ${analysis.plots.map(p => p.cellIndex).join(', ')}`;
+    // Only report new plots
+    const newPlots = analysis.plots.filter(plot => {
+      const plotKey = `${plot.cellIndex}-${plot.type}`;
+      return !this.reportedPlots.has(plotKey);
+    });
+    
+    if (newPlots.length > 0) {
+      const plotMessage = `📊 **New Visualization Detected:**\n${newPlots.length} plot(s) generated in cells: ${newPlots.map(p => p.cellIndex).join(', ')}`;
       this.messageHandler.addMessage('assistant', plotMessage);
+      
+      // Add new plots to reported set
+      newPlots.forEach(plot => {
+        const plotKey = `${plot.cellIndex}-${plot.type}`;
+        this.reportedPlots.add(plotKey);
+      });
     }
 
     // Send analysis to backend for AI insights
@@ -207,6 +224,11 @@ export class NotebookAnalyzer {
 
   public getCurrentNotebookAnalysis(): NotebookAnalysis | undefined {
     return this.currentNotebookAnalysis;
+  }
+
+  public clearReportedItems(): void {
+    this.reportedErrors.clear();
+    this.reportedPlots.clear();
   }
 
   public getNotebookConnectionInfo(): { html: string, connected: boolean } {
