@@ -44,10 +44,10 @@ def test_chat():
 def main():
     test_upload()
 
-    # test_analyze()
-    # test_visualization()
+    test_analyze()
+    test_visualization()
     test_suggestions()
-    # test_code()
+    test_code()
     test_chat()
 if __name__ == "__main__":
     main()

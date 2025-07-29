@@ -255,6 +255,7 @@ class ML_Assistant_Agent:
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 notebook = nbformat.read(f, as_version=4)
+                
             return notebook
         except Exception as e:
             print(f"Error reading notebook: {e}")

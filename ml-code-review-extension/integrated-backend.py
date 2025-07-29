@@ -150,6 +150,7 @@ def upload_file():
         # Set the uploaded notebook as current context for the agent
         # ml_agent.problem_context = f"Uploaded notebook: {file_path}"
         ml_agent.current_notebook = file_path
+        ml_agent.current_notebook_dict=ml_agent.read_notebook(ml_agent.current_notebook)
         #pretty print the dict
         return jsonify({"message": "File uploaded successfully", "file_path": file_path}), 200
     except Exception as e:
@@ -164,14 +165,13 @@ def get_suggestions():
     try:
         if not ml_agent.current_notebook:
             return jsonify({"error": "No notebook uploaded"}), 400
-        
-        # Read the current notebook
-        notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
-        if not notebook_dict:
-            return jsonify({"error": "Failed to read notebook"}), 500
+        if not ml_agent.current_notebook_dict:
+            ml_agent.current_notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
+            if not ml_agent.current_notebook_dict:
+                return jsonify({"error": "Failed to read notebook"}), 500
         
         # Get suggestions from the agent
-        suggestions = ml_agent.get_suggestions(notebook_dict)
+        suggestions = ml_agent.get_suggestions(ml_agent.current_notebook_dict)
         return jsonify({"suggestions": suggestions}), 200
     except Exception as e:
         print(f"Error getting suggestions: {e}")
@@ -186,13 +186,12 @@ def analyze_code():
         if not ml_agent.current_notebook:
             return jsonify({"error": "No notebook uploaded"}), 400
         
-        # Read the current notebook
-        notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
-        if not notebook_dict:
-            return jsonify({"error": "Failed to read notebook"}), 500
-        
+        if not ml_agent.current_notebook_dict:
+            ml_agent.current_notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
+            if not ml_agent.current_notebook_dict:
+                return jsonify({"error": "Failed to read notebook"}), 500
         # Analyze the notebook
-        analysis = ml_agent.analyze_notebook(notebook_dict)
+        analysis = ml_agent.analyze_notebook(ml_agent.current_notebook_dict)
         return jsonify({"analysis": analysis}), 200
     except Exception as e:
         print(f"Error analyzing code: {e}")
@@ -208,15 +207,14 @@ def get_visualization_suggestions():
         if not ml_agent.current_notebook:
             return jsonify({"error": "No notebook uploaded"}), 400
         
-        # Read the current notebook
-        notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
-        if not notebook_dict:
-            return jsonify({"error": "Failed to read notebook"}), 500
-        
+        if not ml_agent.current_notebook_dict:
+            ml_agent.current_notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
+            if not ml_agent.current_notebook_dict:
+                return jsonify({"error": "Failed to read notebook"}), 500
+
         # Get visualization suggestions from the agent
         print("Suggesting visualizations...")
-        visualizations = ml_agent.suggest_visualizations(notebook_dict)
-        print(f"Visualization suggestions: {visualizations}")
+        visualizations = ml_agent.suggest_visualizations(ml_agent.current_notebook_dict)
         return jsonify({"visualizations": visualizations}), 200
     except Exception as e:
         print(f"Error getting visualization suggestions: {e}")
@@ -231,12 +229,13 @@ def get_generated_code():
         chosen_topic = request.args.get("topic", "")
         chosen_option = request.args.get("option", "")
         # Read the current notebook
-        notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
-        if not notebook_dict:
-            return jsonify({"error": "Failed to read notebook"}), 500
+        if not ml_agent.current_notebook_dict:
+            ml_agent.current_notebook_dict = ml_agent.read_notebook(ml_agent.current_notebook)
+            if not ml_agent.current_notebook_dict:
+                return jsonify({"error": "Failed to read notebook"}), 500
         
         # Get code cells from the agent
-        code_cells = ml_agent.get_code(notebook_dict, chosen_topic, chosen_option)
+        code_cells = ml_agent.get_code(ml_agent.current_notebook_dict, chosen_topic, chosen_option)
         return jsonify({"code_cells": code_cells}), 200
     except Exception as e:
         print(f"Error getting code cells: {e}")
