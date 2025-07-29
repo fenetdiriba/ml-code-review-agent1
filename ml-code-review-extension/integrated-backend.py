@@ -196,7 +196,7 @@ def analyze_code():
                 return jsonify({"error": "Failed to read notebook"}), 500
         # Analyze the notebook
         analysis = ml_agent.analyze_notebook(ml_agent.current_notebook_dict)
-        return jsonify({"analysis": analysis}), 200
+        return jsonify(analysis.model_dump()), 200
     except Exception as e:
         print(f"Error analyzing code: {e}")
         return jsonify({"error": str(e)}), 500
@@ -240,9 +240,10 @@ def get_generated_code():
             if not ml_agent.current_notebook_dict:
                 return jsonify({"error": "Failed to read notebook"}), 500
         
-        # Get code cells from the agent
-        code_cells = ml_agent.get_code(ml_agent.current_notebook_dict, chosen_topic, chosen_option)
-        return jsonify({"code_cells": code_cells}), 200
+        # Get code cell from the agent
+        code_cell = ml_agent.get_code(ml_agent.current_notebook_dict, chosen_topic, chosen_option)
+        print(code_cell, type(code_cell))
+        return jsonify(code_cell.model_dump()), 200
     except Exception as e:
         print(f"Error getting code cells: {e}")
         return jsonify({"error": str(e)}), 500

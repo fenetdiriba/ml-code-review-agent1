@@ -13,6 +13,8 @@ from pydantic import BaseModel
 from typing import List
 import nbformat
 import json
+import re
+
 # Load environment variables from .env files
 _ = load_dotenv("../variables.env")
 _ = load_dotenv("secrets.env")
@@ -35,6 +37,19 @@ class VisualizationItem(BaseModel):
 class VisualizationOutput(BaseModel):
     visualizations: List[VisualizationItem]
 
+class CodeOutput(BaseModel):
+    code: str
+    explanation: str
+    cell_block: str
+
+class AnalysisOutput(BaseModel):
+    overall_assessment: str
+    best_practices: str
+    data_handling: str
+    model_implementation: str
+    visualization: str
+    organization: str
+    performance: str
 class NvidiaLlamaAgent:
     """
     LangChain-based wrapper for interacting with NVIDIA's Llama models.
@@ -298,52 +313,47 @@ class ML_Assistant_Agent:
         if not notebook_dict:
             return "Error: Invalid notebook data"
         
-        # Extract code cells and markdown cells
-        code_cells = []
-        markdown_cells = []
-        outputs = []
-        
-        for cell in notebook_dict.get('cells', []):
-            if cell.get('cell_type') == 'code':
-                code_cells.append(cell.get('source', ''))
-            elif cell.get('cell_type') == 'markdown':
-                markdown_cells.append(cell.get('source', ''))
-            elif cell.get('cell_type') == 'output':
-                outputs.append(cell.get('output_type', ''))
-        
-        # Combine all code into one string for analysis
-        all_code = '\n\n'.join([''.join(cell) if isinstance(cell, list) else cell for cell in code_cells])
-        
-        prompt = f"""Please analyze this Jupyter notebook for machine learning best practices:
+        notebook_string = safe_serialize(notebook_dict)
+        analysis_parser = PydanticOutputParser(pydantic_object=AnalysisOutput)
+        format_instructions = analysis_parser.get_format_instructions()
+        # Use LangChain's parser
+        prompt = PromptTemplate(
+            input_variables=["notebook_string"],
+            partial_variables={"format_instructions": format_instructions},
+            template="""        Please analyze this Jupyter notebook for machine learning best practices:       
+        {notebook_string}
+        Focus on:
+        1. Overall code quality assessment
+        2. ML-specific best practices analysis
+        3. Data handling and preprocessing review
+        4. Model implementation suggestions
+        5. Visualization and output improvements
+        6. Code organization and documentation suggestions
+        7. Performance and scalability considerations
+        Return the response in JSON format with keys for each section.
+        example:
+        {{
+            "overall_assessment": "The code is well-structured but lacks proper data preprocessing.",
+            "best_practices": "Use sklearn's StandardScaler for feature scaling.",
+            "data_handling": "Ensure missing values are handled before training.",
+            "model_implementation": "Consider using cross-validation for model evaluation.",
+            "visualization": "Add confusion matrix for classification tasks.",
+            "organization": "Separate data loading and preprocessing into functions.",
+            "performance": "Optimize hyperparameters using grid search."
+        }}"""
+        )
+        formatted_prompt = prompt.format(notebook_string=notebook_string, format_instructions=format_instructions)
+        response = self.ask(formatted_prompt)
 
-                **Code Cells ({len(code_cells)} total):**
-                ```python
-                {all_code}
-                ```
 
-                **Documentation:** {len(markdown_cells)} markdown cells present
-
-                 Please provide:
-                1. Overall code quality assessment
-                2. ML-specific best practices analysis
-                3. Data handling and preprocessing review
-                4. Model implementation suggestions
-                5. Visualization and output improvements
-                6. Code organization and documentation suggestions
-                7. Performance and scalability considerations
-                Return the response in JSON format with keys for each section.
-                example:
-                {{
-                    "overall_assessment": "The code is well-structured but lacks proper data preprocessing.",
-                    "best_practices": "Use sklearn's StandardScaler for feature scaling.",
-                    "data_handling": "Ensure missing values are handled before training.",
-                    "model_implementation": "Consider using cross-validation for model evaluation.",
-                    "visualization": "Add confusion matrix for classification tasks.",
-                    "organization": "Separate data loading and preprocessing into functions.",
-                    "performance": "Optimize hyperparameters using grid search."
-                }}"""
+        try:
+            parsed = analysis_parser.parse(response)
+            return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
+        except Exception as e:
+            print("Parsing failed:", e)
+            return response
         
-        return self.ask(prompt)
+
     
   
     def set_current_notebook(self, file_path: str) -> bool:
@@ -416,8 +426,8 @@ class ML_Assistant_Agent:
             old_notebook_string=old_notebook_string
         )
         response = self.ask(formatted_prompt)
-
-
+        matches = re.findall(r"```(.*?)```", response, re.DOTALL)
+        response = "\n".join(matches) if matches else response
         print("Response from model:", response)
         try:
             parsed = visualization_parser.parse(response)
@@ -522,7 +532,15 @@ class ML_Assistant_Agent:
             self.notebook_history.append(safe_serialize(notebook_dict))
         # Extract relevant information from the notebook
         notebook_string = safe_serialize(notebook_dict)
-        prompt = f"""
+
+        code_parser = PydanticOutputParser(pydantic_object=CodeOutput)
+        format_instructions = code_parser.get_format_instructions()
+        # Use LangChain's parser
+        prompt = PromptTemplate(
+            input_variables=["notebook_string", "chosen_topic", "chosen_option"],
+            partial_variables={"format_instructions": format_instructions},
+            template="""
+        Here are our old notebooks: {notebook_string}
         Please give me our suggested code improvement for the following notebook data:
         {notebook_string}
         Focus on:
@@ -530,11 +548,7 @@ class ML_Assistant_Agent:
         2. The option the user chose: {chosen_option}
         3. The current notebook data
         You are an agent that return in JSON format of code in the following format and no other text:
-        {{
-            "code": "The code that you suggest to the user",
-            "explanation": "The explanation of the code",
-            "cell_block": "The cell block that the code is in by number"
-        }}
+        {format_instructions}
         example:
             Provide specific Python code examples using sklearn, pandas, or numpy.
             return response in JSON format example:
@@ -544,7 +558,21 @@ class ML_Assistant_Agent:
                 "cell_block": "1"  # Assuming this is the first cell in the notebook
             }}
         """
-        return self.ask(prompt)
+        )
+        formatted_prompt = prompt.format(
+            notebook_string=notebook_string,
+            chosen_topic=chosen_topic,
+            chosen_option=chosen_option,
+            format_instructions=format_instructions
+        )
+        response = self.ask(formatted_prompt)
+        try:
+            parsed = code_parser.parse(response)
+            return parsed  # or jsonable_encoder(parsed) if you're returning via API
+        except Exception as e:
+            print("Parsing failed:", e)
+            return response
+        
     def chat(self, question: str) -> str:
         """
         Send a user question to the model, update history, and return the reply.
