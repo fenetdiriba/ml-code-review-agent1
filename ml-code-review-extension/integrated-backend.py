@@ -250,6 +250,10 @@ if __name__ == '__main__':
     print("  POST /analyze - Analyze code and images")
     print("  POST /chat - Chat with ML assistant")
     print("  POST /upload - Upload files")
+    print("  GET /suggestions - Get AI-powered suggestions")
+    print("  GET /visualizations - Get visualization suggestions")
+    print("  GET /analysis - Get code analysis")
+    print("  GET /codegen - Generate code from suggestions")
     print("  GET /health - Health check")
     print("\n🌐 Server starting on http://localhost:3000")
     
