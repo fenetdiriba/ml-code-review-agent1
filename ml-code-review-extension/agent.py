@@ -362,10 +362,13 @@ class ML_Assistant_Agent:
         """
         if not notebook_dict:
             return "Invalid notebook data"
-        
+        old_notebook_string = "".join(self.notebook_history[:3])
         # Extract relevant information from the notebook
         notebook_string = safe_serialize(notebook_dict)
-        prompt = f"""Please suggest improvements for the following notebook data:
+        prompt = f"""
+        Here are our old notebooks: {old_notebook_string}
+
+        Please suggest improvements for the following notebook data:
         {notebook_string}
         Focus on:
         1. Focus on how the current architecture is doing in terms of the outputs
@@ -407,7 +410,8 @@ class ML_Assistant_Agent:
             self.notebook_history.append(safe_serialize(notebook_dict))
         # Extract relevant information from the notebook
         notebook_string = safe_serialize(notebook_dict)
-        prompt = f"""Please give me our suggested code improvement for the following notebook data:
+        prompt = f"""
+        Please give me our suggested code improvement for the following notebook data:
         {notebook_string}
         Focus on:
         1. The topic the user chose: {chosen_topic}
