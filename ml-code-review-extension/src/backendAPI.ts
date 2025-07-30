@@ -18,7 +18,7 @@ export class BackendAPI {
       const client = parsedUrl.protocol === 'https:' ? https : http;
       
       const postData = JSON.stringify({
-        message
+        question: message
       });
 
       return new Promise((resolve, reject) => {
@@ -246,7 +246,7 @@ export class BackendAPI {
       const http = require('http');
       const url = require('url');
       
-      const parsedUrl = url.parse(`${this.baseUrl}/visualizations`);
+      const parsedUrl = url.parse(`${this.baseUrl}/visualize`);
       const client = parsedUrl.protocol === 'https:' ? https : http;
       
       return new Promise((resolve, reject) => {
@@ -299,7 +299,7 @@ export class BackendAPI {
       const http = require('http');
       const url = require('url');
       
-      const parsedUrl = url.parse(`${this.baseUrl}/analysis`);
+      const parsedUrl = url.parse(`${this.baseUrl}/analyze`);
       const client = parsedUrl.protocol === 'https:' ? https : http;
       
       const method = code ? 'POST' : 'GET';
@@ -359,10 +359,11 @@ export class BackendAPI {
       const http = require('http');
       const url = require('url');
       
-      const parsedUrl = url.parse(`${this.baseUrl}/codegen`);
+      const topic = suggestionData.topic || '';
+      const option = suggestionData.option || '';
+      const queryParams = new URLSearchParams({ topic, option });
+      const parsedUrl = url.parse(`${this.baseUrl}/code?${queryParams}`);
       const client = parsedUrl.protocol === 'https:' ? https : http;
-      
-      const postData = JSON.stringify(suggestionData);
 
       return new Promise((resolve, reject) => {
         const req = client.request({
@@ -371,8 +372,7 @@ export class BackendAPI {
           path: parsedUrl.path,
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData)
+            'Content-Type': 'application/json'
           }
         }, (res: any) => {
           let data = '';
@@ -401,7 +401,6 @@ export class BackendAPI {
           reject(new Error('Code generation timeout'));
         });
         
-        req.write(postData);
         req.end();
       });
     } catch (error) {

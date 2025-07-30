@@ -152,7 +152,7 @@ def upload_file():
         ml_agent.current_notebook = file_path
         ml_agent.current_notebook_dict=ml_agent.read_notebook(ml_agent.current_notebook)
         #pretty print the dict
-        return jsonify({"message": "File uploaded successfully", "file_path": file_path}), 200
+        return jsonify({"success": True, "message": "File uploaded successfully", "file_path": file_path}), 200
     except Exception as e:
         print(f"Error processing file upload: {e}")
         return jsonify({"error": str(e)}), 500
@@ -248,7 +248,25 @@ def get_generated_code():
         print(f"Error getting code cells: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/chat', methods=['GET'])
+@app.route('/notebook-analysis', methods=['POST'])
+def receive_notebook_analysis():
+    """Receive notebook analysis from frontend"""
+    if not ml_agent:
+        return jsonify({"error": "Conversation agent not initialized"}), 500
+    
+    try:
+        data = request.get_json()
+        analysis = data.get("analysis", {})
+        cell_data = data.get("cellData", [])
+        timestamp = data.get("timestamp", "")
+        
+        # Store or process the analysis data as needed
+        return jsonify({"message": "Notebook analysis received successfully", "status": "processed"}), 200
+    except Exception as e:
+        print(f"Error processing notebook analysis: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/chat', methods=['POST'])
 def chat_with_agent():
     """Chat with the ML assistant agent"""
     if not ml_agent:
@@ -275,13 +293,17 @@ if __name__ == '__main__':
     print("🚀 Starting Integrated ML Code Review Backend...")
     print(f"✅ Conversation Agent: {'Available' if ml_agent else 'Not available'}")
     print("📡 Endpoints:")
-    print("  POST /analyze - Analyze code and images")
-    print("  POST /chat - Chat with ML assistant")
-    print("  POST /upload - Upload files")
+    print("  POST /upload - Upload .ipynb notebook files")
+    print("  POST /upload-json - Upload notebook as JSON string")
+    print("  POST /problem_context - Set problem context")
+    print("  POST /data_description - Set data description")
+    print("  POST /override_context - Set context override")
     print("  GET /suggestions - Get AI-powered suggestions")
-    print("  GET /visualizations - Get visualization suggestions")
-    print("  GET /analysis - Get code analysis")
-    print("  GET /codegen - Generate code from suggestions")
+    print("  GET /visualize - Get visualization suggestions")
+    print("  GET /analyze - Get code analysis")
+    print("  GET /code - Generate code from suggestions")
+    print("  POST /notebook-analysis - Receive notebook analysis")
+    print("  POST /chat - Chat with ML assistant")
     print("  GET /health - Health check")
     print("\n🌐 Server starting on http://localhost:3000")
     
