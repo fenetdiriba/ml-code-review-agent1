@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
+from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.output_parsers import StructuredOutputParser
 from langchain.output_parsers import ResponseSchema
@@ -73,7 +73,7 @@ class NvidiaLlamaAgent:
         )
         
         # Initialize chat history
-        self.chat_history = InMemoryChatMessageHistory()
+        self.chat_history = []
 
     def chat(self,
              message: str,
@@ -143,7 +143,7 @@ class ML_Assistant_Agent:
         )
         
         # Initialize chat history
-        self.chat_history = InMemoryChatMessageHistory()
+        self.chat_history = []
         self.data_description: Optional[str] = None
         self.current_notebook: Optional[str] = None
         self.current_notebook_dict: Optional[dict] = None
@@ -157,7 +157,7 @@ class ML_Assistant_Agent:
         # Set up system message for ML assistance
         system_message = SystemMessage(content="""You are an AI assistant specialized in machine learning code review and analysis. 
         You help users understand, improve, and debug their ML code. Provide clear, actionable feedback and suggestions.""")
-        self.chat_history.add_message(system_message)
+        self.chat_history.append(system_message)
 
     def set_problem_context(self, context: str):
         """
@@ -168,7 +168,7 @@ class ML_Assistant_Agent:
         """
         self.problem_context = context
         system_message = SystemMessage(content=f"Problem context: {context}")
-        self.chat_history.add_message(system_message)
+        self.chat_history.append(system_message)
     def set_data_description(self, description: str):
         """
         Set the data description for the agent.
@@ -178,7 +178,7 @@ class ML_Assistant_Agent:
         """
         self.data_description = description
         system_message = SystemMessage(content=f"Data description: {description}")
-        self.chat_history.add_message(system_message)
+        self.chat_history.append(system_message)
 
     def ask(self, question: str) -> str:
         """
@@ -194,17 +194,17 @@ class ML_Assistant_Agent:
             question = question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
             # Add user message to history
             human_message = HumanMessage(content=question)
-            self.chat_history.add_message(human_message)
+            self.chat_history.append(human_message)
             
             # Get all messages for context
-            messages = self.chat_history.messages
+            messages = self.chat_history
             
             # Invoke the model with full conversation history
             response = self.llm.invoke(messages)
             
             # Add AI response to history
             ai_message = AIMessage(content=response.content)
-            self.chat_history.add_message(ai_message)
+            self.chat_history.append(ai_message)
             
             return response.content
 
@@ -219,7 +219,7 @@ class ML_Assistant_Agent:
         self.chat_history.clear()
         system_message = SystemMessage(content="""You are an AI assistant specialized in machine learning code review and analysis. 
         You help users understand, improve, and debug their ML code. Provide clear, actionable feedback and suggestions.""")
-        self.chat_history.add_message(system_message)
+        self.chat_history.append(system_message)
 
     def get_history(self) -> List[dict]:
         """
@@ -229,7 +229,7 @@ class ML_Assistant_Agent:
             List[dict]: A list of message dicts with role and content.
         """
         history = []
-        for message in self.chat_history.messages:
+        for message in self.chat_history:
             if isinstance(message, HumanMessage):
                 history.append({"role": "user", "content": message.content})
             elif isinstance(message, AIMessage):
@@ -536,7 +536,7 @@ Example:
         """
         if not notebook_dict:
             return "Invalid notebook data"
-        if chosen_topic is "suggestion":
+        if chosen_topic == "suggestion":
             #save the chosen suggestion and notebook history
             chosen_suggestion = chosen_option
             self.chosen_suggestion = chosen_suggestion
