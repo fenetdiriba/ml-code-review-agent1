@@ -72,18 +72,12 @@ export class NotebookAnalyzer {
         // upload file to backend first
         const active_notebook_url = this.notebookMonitor.getActiveNotebook()?.uri.toString();
         if (active_notebook_url) {
-          console.log('[NOTEBOOK] Original active_notebook_url:', active_notebook_url);
-          
           // Convert file:// URL to actual file path if needed
           let uploadPath = active_notebook_url;
           if (active_notebook_url.startsWith('file://')) {
             uploadPath = decodeURIComponent(active_notebook_url.replace('file://', ''));
-            console.log('[NOTEBOOK] Converted file URL to path for upload:', uploadPath);
-          } else {
-            console.log('[NOTEBOOK] No conversion needed, using original path:', uploadPath);
           }
           
-          console.log('[NOTEBOOK] About to call uploadFile with path:', uploadPath);
           await this.api.uploadFile(uploadPath);
           
           // Add longer delay to ensure backend processes upload

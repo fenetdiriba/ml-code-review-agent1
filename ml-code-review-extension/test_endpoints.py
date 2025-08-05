@@ -20,7 +20,7 @@ def test_health():
         return False
 
 def test_upload():
-      file_path = "/Users/jiahuajiang/Desktop/Code/Nvidia-agent/2_Linear_Regression_Housing.ipynb"
+      file_path = "../2_Linear_Regression_Housing.ipynb"
       with open(file_path, 'rb') as f:
           files = {'file': (file_path, f, 'application/json')}
           response = requests.post(f"{BASE_URL}/upload", files=files)

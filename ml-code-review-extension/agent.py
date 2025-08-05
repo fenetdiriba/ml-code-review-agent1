@@ -66,10 +66,11 @@ class NvidiaLlamaAgent:
         
         # Initialize the LangChain NVIDIA chat model
         self.llm = ChatNVIDIA(
-            model="ai-llama-3_1-8b-instruct",  # Use the correct model name from the available list
+            model="ai-llama-3_1-8b-instruct",  # Use the correct NVIDIA model name
             api_key=api_key,
             temperature=0.3,
-            max_tokens=1024
+            max_tokens=1024,
+            nvidia_api_key=api_key  # Explicitly set the API key
         )
         
         # Initialize chat history
@@ -99,7 +100,8 @@ class NvidiaLlamaAgent:
                     model=model,
                     api_key=self.api_key,
                     temperature=temperature,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
+                    nvidia_api_key=self.api_key  # Explicitly set the API key
                 )
             
             # Create human message and invoke the model
@@ -166,10 +168,11 @@ class ML_Assistant_Agent:
         
         # Initialize the LangChain NVIDIA chat model
         self.llm = ChatNVIDIA(
-            model="ai-llama-3_1-8b-instruct",  # Use the correct model name from the available list
+            model="ai-llama-3_1-8b-instruct",  # Use the correct NVIDIA model name
             api_key=api_key,
             temperature=0.3,  # Lower temperature for more consistent JSON output
-            max_tokens=1024   # Maximum allowed token limit for ChatNVIDIA
+            max_tokens=1024,  # Maximum allowed token limit for ChatNVIDIA
+            nvidia_api_key=api_key  # Explicitly set the API key
         )
         
         # Initialize chat history
@@ -328,15 +331,12 @@ class ML_Assistant_Agent:
             dict: Content of the notebook as a dictionary
         """
         try:
-            print(f"Attempting to read notebook from: {file_path}")
             if not os.path.exists(file_path):
-                print(f"File does not exist: {file_path}")
                 return None
                 
             with open(file_path, 'r', encoding='utf-8') as f:
                 notebook = nbformat.read(f, as_version=4)
                 
-            print(f"Successfully read notebook with {len(notebook.get('cells', []))} cells")
             return notebook
         except Exception as e:
             print(f"Error reading notebook: {e}")
@@ -398,19 +398,14 @@ Remember: Return ONLY the JSON object, nothing else.
         formatted_prompt = prompt.format(notebook_string=notebook_string, format_instructions=format_instructions)
         response = self.ask(formatted_prompt)
 
-        print("Analysis response from model:", response)
-        
         # Clean the response before parsing
         cleaned_response = clean_json_response(response)
-        print("Cleaned analysis response:", cleaned_response)
         
         try:
             parsed = analysis_parser.parse(cleaned_response)
-            return parsed  # or jsonable_encoder(parsed) if you're returning via API
+            return parsed
         except Exception as e:
             print("Analysis parsing failed:", e)
-            print("Original response:", response)
-            print("Cleaned response:", cleaned_response)
             return response
         
 

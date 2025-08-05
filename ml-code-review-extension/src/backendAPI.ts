@@ -3,13 +3,9 @@ import { NotebookAnalysis, NotebookCellData } from './types';
 
 // Helper function to convert file:// URLs to actual file paths
 function convertFileUrlToPath(filePath: string): string {
-  console.log(`🔧 HELPER FUNCTION CALLED WITH: ${filePath} 🔧`);
   if (filePath.startsWith('file://')) {
-    const converted = decodeURIComponent(filePath.replace('file://', ''));
-    console.log(`[HELPER] Converted file URL: ${filePath} -> ${converted}`);
-    return converted;
+    return decodeURIComponent(filePath.replace('file://', ''));
   }
-  console.log(`[HELPER] No conversion needed for: ${filePath}`);
   return filePath;
 }
 
@@ -78,28 +74,20 @@ export class BackendAPI {
   }
 
   async uploadFile(filePath: string): Promise<any> {
-    console.log(`🚨 UPLOAD METHOD CALLED WITH: ${filePath} 🚨`);
-    console.log(`[UPLOAD] Starting upload for: ${filePath}`);
-    console.log(`[UPLOAD] uploadInProgress flag: ${this.uploadInProgress}`);
-    
     // Convert file path for comparison
     const normalizedPath = convertFileUrlToPath(filePath);
-    console.log(`[UPLOAD] Normalized path: ${normalizedPath}`);
     
     // Prevent duplicate uploads of the same file
     if (this.lastUploadedFile === normalizedPath) {
-      console.log(`[UPLOAD] File already uploaded recently: ${normalizedPath}`);
       return { success: true, message: 'File already uploaded', file_path: this.lastUploadedFile };
     }
     
     // Prevent duplicate uploads
     if (this.uploadInProgress) {
-      console.log('[UPLOAD] Upload already in progress, skipping...');
       return { success: false, message: 'Upload already in progress' };
     }
     
     this.uploadInProgress = true;
-    console.log(`[UPLOAD] Set uploadInProgress to true`);
     
     try {
       const https = require('https');
@@ -112,14 +100,8 @@ export class BackendAPI {
       
       // Check if file exists before attempting upload
       if (!fs.existsSync(actualFilePath)) {
-        console.error(`File not found: ${actualFilePath}`);
         throw new Error(`File not found: ${actualFilePath}`);
       }
-      
-      console.log(`File exists and ready for upload: ${actualFilePath}`);
-      console.log(`File size: ${fs.statSync(actualFilePath).size} bytes`);
-      
-      console.log(`Attempting to upload file: ${actualFilePath} to ${this.baseUrl}/upload`);
       const parsedUrl = url.parse(`${this.baseUrl}/upload`);
       const client = parsedUrl.protocol === 'https:' ? https : http;
       
@@ -138,26 +120,21 @@ export class BackendAPI {
           res.on('data', (chunk: any) => data += chunk);
           res.on('end', () => {
             try {
-              console.log(`Upload response status: ${res.statusCode}, data: ${data.substring(0, 500)}`);
               if (res.statusCode !== 200) {
-                console.error(`Upload failed with status ${res.statusCode}:`, data);
                 reject(new Error(`HTTP ${res.statusCode}: ${data}`));
                 return;
               }
               const parsed = JSON.parse(data);
-              console.log('Upload successful:', parsed);
               // Store the uploaded file path to prevent duplicate uploads
               this.lastUploadedFile = normalizedPath;
               resolve(parsed);
             } catch (e) {
-              console.error('Failed to parse upload response:', data);
               reject(new Error(`Failed to parse response: ${data.substring(0, 200)}`));
             }
           });
         });
 
         req.on('error', (err: any) => {
-          console.error('Upload request error:', err);
           reject(err);
         });
         
@@ -169,11 +146,9 @@ export class BackendAPI {
         form.pipe(req);
       });
     } catch (error) {
-      console.error('Upload API error:', error);
       throw error;
     } finally {
       this.uploadInProgress = false;
-      console.log(`[UPLOAD] Reset uploadInProgress to false`);
     }
   }
 
@@ -462,7 +437,6 @@ export class BackendAPI {
   // Method to clear the last uploaded file (useful for testing or when switching files)
   clearLastUploadedFile(): void {
     this.lastUploadedFile = null;
-    console.log('[UPLOAD] Cleared last uploaded file');
   }
 
   async generateCode(suggestionData: any): Promise<any> {
