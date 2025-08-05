@@ -16,6 +16,7 @@ export class BackendAPI {
 
   constructor(baseUrl: string = 'http://localhost:3000') {
     this.baseUrl = baseUrl;
+    console.log('🔌 BackendAPI: Initialized with baseUrl:', this.baseUrl);
   }
 
   async sendChatMessage(message: string): Promise<any> {
@@ -213,6 +214,7 @@ export class BackendAPI {
   }
 
   async getSuggestions(): Promise<any> {
+    console.log('🔍 BackendAPI.getSuggestions() called');
     const maxRetries = 3;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -224,59 +226,60 @@ export class BackendAPI {
         const parsedUrl = url.parse(`${this.baseUrl}/suggestions`);
         const client = parsedUrl.protocol === 'https:' ? https : http;
         
-        return new Promise((resolve, reject) => {
-        const req = client.request({
-          hostname: parsedUrl.hostname,
-          port: parsedUrl.port,
-          path: parsedUrl.path,
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }, (res: any) => {
-          let data = '';
-          res.on('data', (chunk: any) => data += chunk);
-          res.on('end', () => {
-            try {
-              if (res.statusCode !== 200) {
-                reject(new Error(`HTTP ${res.statusCode}: ${data}`));
-                return;
-              }
-              const parsed = JSON.parse(data);
-              resolve(parsed);
-            } catch (e) {
-              reject(new Error(`Failed to parse response: ${data}`));
+        const result = await new Promise((resolve, reject) => {
+          const req = client.request({
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port,
+            path: parsedUrl.path,
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
             }
+          }, (res: any) => {
+            let data = '';
+            res.on('data', (chunk: any) => data += chunk);
+            res.on('end', () => {
+              try {
+                if (res.statusCode !== 200) {
+                  reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+                  return;
+                }
+                const parsed = JSON.parse(data);
+                resolve(parsed);
+              } catch (e) {
+                reject(new Error(`Failed to parse response: ${data}`));
+              }
+            });
           });
-        });
 
-        req.on('error', (err: any) => {
-          console.error('Suggestions API error:', err);
-          reject(err);
+          req.on('error', (err: any) => {
+            console.error('Suggestions API error:', err);
+            reject(err);
+          });
+          
+          req.setTimeout(10000, () => {
+            req.destroy();
+            reject(new Error('Suggestions request timeout'));
+          });
+          
+          req.end();
         });
         
-        req.setTimeout(10000, () => {
-          req.destroy();
-          reject(new Error('Suggestions request timeout'));
-        });
+        // If we get here, the request was successful
+        console.log('✅ BackendAPI.getSuggestions() successful:', result);
+        return result;
         
-        req.end();
-      });
-      
-      // If we get here, the request was successful
-      break;
-      
-    } catch (error) {
-      console.error(`Suggestions API error (attempt ${attempt}):`, error);
-      
-      if (attempt === maxRetries) {
-        throw error;
+      } catch (error) {
+        console.error(`Suggestions API error (attempt ${attempt}):`, error);
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Wait before retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
-      
-      // Wait before retry with exponential backoff
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
     }
-  }
   }
 
   async getVisualizations(): Promise<any> {
@@ -291,59 +294,59 @@ export class BackendAPI {
         const parsedUrl = url.parse(`${this.baseUrl}/visualize`);
         const client = parsedUrl.protocol === 'https:' ? https : http;
         
-        return new Promise((resolve, reject) => {
-        const req = client.request({
-          hostname: parsedUrl.hostname,
-          port: parsedUrl.port,
-          path: parsedUrl.path,
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }, (res: any) => {
-          let data = '';
-          res.on('data', (chunk: any) => data += chunk);
-          res.on('end', () => {
-            try {
-              if (res.statusCode !== 200) {
-                reject(new Error(`HTTP ${res.statusCode}: ${data}`));
-                return;
-              }
-              const parsed = JSON.parse(data);
-              resolve(parsed);
-            } catch (e) {
-              reject(new Error(`Failed to parse response: ${data}`));
+        const result = await new Promise((resolve, reject) => {
+          const req = client.request({
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port,
+            path: parsedUrl.path,
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
             }
+          }, (res: any) => {
+            let data = '';
+            res.on('data', (chunk: any) => data += chunk);
+            res.on('end', () => {
+              try {
+                if (res.statusCode !== 200) {
+                  reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+                  return;
+                }
+                const parsed = JSON.parse(data);
+                resolve(parsed);
+              } catch (e) {
+                reject(new Error(`Failed to parse response: ${data}`));
+              }
+            });
           });
-        });
 
-        req.on('error', (err: any) => {
-          console.error('Visualizations API error:', err);
-          reject(err);
+          req.on('error', (err: any) => {
+            console.error('Visualizations API error:', err);
+            reject(err);
+          });
+          
+          req.setTimeout(10000, () => {
+            req.destroy();
+            reject(new Error('Visualizations request timeout'));
+          });
+          
+          req.end();
         });
         
-        req.setTimeout(10000, () => {
-          req.destroy();
-          reject(new Error('Visualizations request timeout'));
-        });
+        // If we get here, the request was successful
+        return result;
         
-        req.end();
-      });
-      
-      // If we get here, the request was successful
-      break;
-      
-    } catch (error) {
-      console.error(`Visualizations API error (attempt ${attempt}):`, error);
-      
-      if (attempt === maxRetries) {
-        throw error;
+      } catch (error) {
+        console.error(`Visualizations API error (attempt ${attempt}):`, error);
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Wait before retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
-      
-      // Wait before retry with exponential backoff
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
     }
-  }
   }
 
   async getAnalysis(code?: string): Promise<any> {
@@ -361,51 +364,51 @@ export class BackendAPI {
         const method = code ? 'POST' : 'GET';
         const postData = code ? JSON.stringify({ code }) : null;
         
-        return new Promise((resolve, reject) => {
-        const req = client.request({
-          hostname: parsedUrl.hostname,
-          port: parsedUrl.port,
-          path: parsedUrl.path,
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            ...(postData && { 'Content-Length': Buffer.byteLength(postData) })
-          }
-        }, (res: any) => {
-          let data = '';
-          res.on('data', (chunk: any) => data += chunk);
-          res.on('end', () => {
-            try {
-              if (res.statusCode !== 200) {
-                reject(new Error(`HTTP ${res.statusCode}: ${data}`));
-                return;
-              }
-              const parsed = JSON.parse(data);
-              resolve(parsed);
-            } catch (e) {
-              reject(new Error(`Failed to parse response: ${data}`));
+        const result = await new Promise((resolve, reject) => {
+          const req = client.request({
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port,
+            path: parsedUrl.path,
+            method: method,
+            headers: {
+              'Content-Type': 'application/json',
+              ...(postData && { 'Content-Length': Buffer.byteLength(postData) })
             }
+          }, (res: any) => {
+            let data = '';
+            res.on('data', (chunk: any) => data += chunk);
+            res.on('end', () => {
+              try {
+                if (res.statusCode !== 200) {
+                  reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+                  return;
+                }
+                const parsed = JSON.parse(data);
+                resolve(parsed);
+              } catch (e) {
+                reject(new Error(`Failed to parse response: ${data}`));
+              }
+            });
           });
-        });
 
-        req.on('error', (err: any) => {
-          console.error('Analysis API error:', err);
-          reject(err);
+          req.on('error', (err: any) => {
+            console.error('Analysis API error:', err);
+            reject(err);
+          });
+          
+          req.setTimeout(10000, () => {
+            req.destroy();
+            reject(new Error('Analysis request timeout'));
+          });
+          
+          if (postData) {
+            req.write(postData);
+          }
+          req.end();
         });
         
-        req.setTimeout(10000, () => {
-          req.destroy();
-          reject(new Error('Analysis request timeout'));
-        });
-        
-        if (postData) {
-          req.write(postData);
-        }
-        req.end();
-      });
-      
-      // If we get here, the request was successful
-      break;
+        // If we get here, the request was successful
+        return result;
       
     } catch (error) {
       console.error(`Analysis API error (attempt ${attempt}):`, error);
