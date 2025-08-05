@@ -226,7 +226,10 @@ class ML_Assistant_Agent:
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                question = question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
+                # Only add context if it's not already in the question
+                if "context of our problem" not in question and "data description" not in question:
+                    question = question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
+                
                 # Add user message to history
                 human_message = HumanMessage(content=question)
                 self.chat_history.append(human_message)
@@ -246,7 +249,13 @@ class ML_Assistant_Agent:
             except Exception as e:
                 print(f"Error in ask method (attempt {attempt + 1}/{max_retries}): {e}")
                 if attempt == max_retries - 1:  # Last attempt
-                    return f"AI request failed after {max_retries} attempts. Error: {str(e)}"
+                    # Return a structured error response instead of raw error
+                    error_response = {
+                        "error": True,
+                        "message": f"AI request failed after {max_retries} attempts",
+                        "details": str(e)
+                    }
+                    return json.dumps(error_response)
                 # Wait before retry
                 import time
                 time.sleep(1)
@@ -398,6 +407,24 @@ Remember: Return ONLY the JSON object, nothing else.
         formatted_prompt = prompt.format(notebook_string=notebook_string, format_instructions=format_instructions)
         response = self.ask(formatted_prompt)
 
+        # Check if response is an error
+        try:
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return a fallback analysis
+                return AnalysisOutput(
+                    overall_assessment="AI service temporarily unavailable",
+                    best_practices=f"Error: {response_data.get('message', 'Unknown error')}",
+                    data_handling="Please try again later",
+                    model_implementation="",
+                    visualization="",
+                    organization="",
+                    performance=""
+                )
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+
         # Clean the response before parsing
         cleaned_response = clean_json_response(response)
         
@@ -406,7 +433,16 @@ Remember: Return ONLY the JSON object, nothing else.
             return parsed
         except Exception as e:
             print("Analysis parsing failed:", e)
-            return response
+            # Return a fallback analysis instead of raw error
+            return AnalysisOutput(
+                overall_assessment="Unable to parse AI response",
+                best_practices="The AI response could not be parsed",
+                data_handling="Please try again or check your notebook format",
+                model_implementation="",
+                visualization="",
+                organization="",
+                performance=""
+            )
         
 
     
@@ -496,6 +532,20 @@ Example of expected format:
 
         print("Visualization response from model:", response)
         
+        # Check if response is an error
+        try:
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return a fallback visualization
+                return [VisualizationItem(
+                    visualization_type="error",
+                    description="AI service temporarily unavailable",
+                    why=f"Error: {response_data.get('message', 'Unknown error')}. Please try again later."
+                )]
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+        
         # Clean the response before parsing
         cleaned_response = clean_json_response(response)
         print("Cleaned visualization response:", cleaned_response)
@@ -507,7 +557,12 @@ Example of expected format:
             print("Visualization parsing failed:", e)
             print("Original response:", response)
             print("Cleaned response:", cleaned_response)
-            return response
+            # Return a fallback visualization instead of raw error
+            return [VisualizationItem(
+                visualization_type="error",
+                description="Unable to parse AI response",
+                why="The AI response could not be parsed. Please try again or check your notebook format."
+            )]
 
 
     def get_suggestions(self, notebook_dict: dict) -> str:
@@ -582,6 +637,19 @@ Example of expected format:
 
         print("Response from model:", response)
         
+        # Check if response is an error
+        try:
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return it as a fallback suggestion
+                return [{
+                    "suggestion": "AI service temporarily unavailable",
+                    "explanation": f"Error: {response_data.get('message', 'Unknown error')}. Please try again later."
+                }]
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+        
         # Clean the response before parsing
         cleaned_response = clean_json_response(response)
         print("Cleaned response:", cleaned_response)
@@ -593,7 +661,11 @@ Example of expected format:
             print("Parsing failed:", e)
             print("Original response:", response)
             print("Cleaned response:", cleaned_response)
-            return response
+            # Return a fallback suggestion instead of the raw error
+            return [{
+                "suggestion": "Unable to parse AI response",
+                "explanation": "The AI response could not be parsed. Please try again or check your notebook format."
+            }]
 
     def get_code(self, notebook_dict: dict, chosen_topic: str, chosen_option) -> str:
         """
@@ -654,6 +726,20 @@ Example of expected format:
         
         print("Code generation response from model:", response)
         
+        # Check if response is an error
+        try:
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return a fallback code output
+                return CodeOutput(
+                    code="# AI service temporarily unavailable\n# Please try again later",
+                    explanation=f"Error: {response_data.get('message', 'Unknown error')}",
+                    cell_block="error"
+                )
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+        
         # Clean the response before parsing
         cleaned_response = clean_json_response(response)
         print("Cleaned code response:", cleaned_response)
@@ -665,7 +751,12 @@ Example of expected format:
             print("Code parsing failed:", e)
             print("Original response:", response)
             print("Cleaned response:", cleaned_response)
-            return response
+            # Return a fallback code output instead of raw error
+            return CodeOutput(
+                code="# Unable to parse AI response\n# Please try again or check your notebook format",
+                explanation="The AI response could not be parsed",
+                cell_block="error"
+            )
         
     def chat(self, question: str) -> str:
         """
