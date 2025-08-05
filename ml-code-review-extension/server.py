@@ -197,6 +197,31 @@ def generate_code():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/notebook-analysis', methods=['POST'])
+def notebook_analysis():
+    """Handle notebook analysis from extension"""
+    try:
+        if not agent:
+            return jsonify({"error": "AI agent not available"}), 500
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        # Log the received analysis data
+        print(f"Received notebook analysis: {data}")
+        
+        # For now, just acknowledge receipt
+        # In the future, this could trigger additional processing
+        return jsonify({
+            "success": True,
+            "message": "Notebook analysis received",
+            "timestamp": data.get('timestamp', '')
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/chat', methods=['GET'])
 def chat():
     """Handle chat messages"""
