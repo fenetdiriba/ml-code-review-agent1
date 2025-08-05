@@ -16,8 +16,7 @@ import json
 import re
 
 # Load environment variables from .env files
-_ = load_dotenv("../variables.env")
-_ = load_dotenv("secrets.env")
+_ = load_dotenv("../secrets.env")
 API_KEY = os.environ.get("API_KEY")
 
 # Define a structured suggestion object
@@ -64,12 +63,12 @@ class NvidiaLlamaAgent:
         self.api_key = api_key
         os.environ["NVIDIA_API_KEY"] = api_key
         
-        # Initialize the LangChain NVIDIA chat model
+        # Initialize the LangChain NVIDIA chat model with proper configuration
         self.llm = ChatNVIDIA(
-            model="meta/llama-3.1-8b-instruct",
-            api_key=api_key,
-            temperature=0.7,
-            max_tokens=512
+            model="ai-gemma-2-9b-it",  # Use a working NVIDIA model
+            nvidia_api_key=api_key,
+            temperature=0.3,
+            max_tokens=1024
         )
         
         # Initialize chat history
@@ -77,9 +76,9 @@ class NvidiaLlamaAgent:
 
     def chat(self,
              message: str,
-             model: str = "meta/llama-3.1-8b-instruct",
-             max_tokens: int = 512,
-             temperature: float = 0.7) -> Optional[str]:
+             model: str = "ai-llama-3_1-8b-instruct",
+             max_tokens: int = 1024,
+             temperature: float = 0.3) -> Optional[str]:
         """
         Send a single chat message and receive a response.
 
@@ -94,10 +93,10 @@ class NvidiaLlamaAgent:
         """
         try:
             # Update model parameters if different from defaults
-            if model != "meta/llama-3.1-8b-instruct" or max_tokens != 512 or temperature != 0.7:
+            if model != "ai-gemma-2-9b-it" or max_tokens != 1024 or temperature != 0.3:
                 self.llm = ChatNVIDIA(
-                    model=model,
-                    api_key=self.api_key,
+                    model=model if model.startswith("ai-") else f"ai-{model}",
+                    nvidia_api_key=self.api_key,
                     temperature=temperature,
                     max_tokens=max_tokens
                 )
@@ -119,6 +118,92 @@ def safe_serialize(obj):
             return str(o)  # or `repr(o)` if needed
         return json.dumps(obj, indent=2, default=convert)
 
+def validate_json_response(response: str) -> bool:
+    """Validate if a response is valid JSON"""
+    try:
+        json.loads(response)
+        return True
+    except (json.JSONDecodeError, TypeError):
+        return False
+
+def clean_json_response(response: str) -> str:
+    """Clean and fix malformed JSON responses"""
+    try:
+        # Try to parse as-is first
+        json.loads(response)
+        return response
+    except json.JSONDecodeError:
+        # Try to extract JSON from the response
+        import re
+        
+        # Remove common prefixes/suffixes that NVIDIA API might add
+        cleaned = response.strip()
+        
+        # Remove markdown code blocks
+        if '```json' in cleaned:
+            # Extract content between ```json and ```
+            json_match = re.search(r'```json\s*(.*?)\s*```', cleaned, re.DOTALL)
+            if json_match:
+                cleaned = json_match.group(1).strip()
+        elif '```' in cleaned:
+            # Extract content between ``` blocks
+            json_match = re.search(r'```\s*(.*?)\s*```', cleaned, re.DOTALL)
+            if json_match:
+                cleaned = json_match.group(1).strip()
+        
+        # Try to parse the cleaned content
+        try:
+            json.loads(cleaned)
+            return cleaned
+        except json.JSONDecodeError:
+            pass
+        
+        # Remove any leading/trailing non-JSON content
+        # Look for the first { and last } to extract JSON content
+        start_idx = cleaned.find('{')
+        end_idx = cleaned.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            json_content = cleaned[start_idx:end_idx + 1]
+            try:
+                json.loads(json_content)
+                return json_content
+            except json.JSONDecodeError:
+                pass
+        
+        # Try to find array-style JSON
+        start_idx = cleaned.find('[')
+        end_idx = cleaned.rfind(']')
+        
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            json_content = cleaned[start_idx:end_idx + 1]
+            try:
+                json.loads(json_content)
+                return json_content
+            except json.JSONDecodeError:
+                pass
+        
+        # Remove common API wrapper patterns
+        patterns_to_remove = [
+            r"'stream':\s*False,?\s*",
+            r"'tool_choice':\s*None,?\s*",
+            r"}\]\s*}\s*\]\s*$",
+            r"^\s*\[?\s*",
+            r"\s*\]?\s*$"
+        ]
+        
+        for pattern in patterns_to_remove:
+            cleaned = re.sub(pattern, '', cleaned)
+        
+        try:
+            json.loads(cleaned)
+            return cleaned
+        except json.JSONDecodeError:
+            pass
+        
+        # If no valid JSON found, return a fallback
+        return response
+
 class ML_Assistant_Agent:
     """
     Higher-level agent that preserves conversation history
@@ -134,13 +219,18 @@ class ML_Assistant_Agent:
         self.api_key = api_key
         os.environ["NVIDIA_API_KEY"] = api_key
         
-        # Initialize the LangChain NVIDIA chat model
-        self.llm = ChatNVIDIA(
-            model="meta/llama-3.1-8b-instruct",
-            api_key=api_key,
-            temperature=0.7,
-            max_tokens=512
-        )
+        # Initialize the LangChain NVIDIA chat model with proper configuration
+        try:
+            self.llm = ChatNVIDIA(
+                model="ai-gemma-2-9b-it",  # Use a working NVIDIA model
+                nvidia_api_key=api_key,
+                temperature=0.3,  # Lower temperature for more consistent JSON output
+                max_tokens=1024  # Maximum allowed token limit for ChatNVIDIA
+            )
+            pass  # Initialization successful
+        except Exception as e:
+            print(f"❌ Failed to initialize NVIDIA ChatLLM: {e}")
+            self.llm = None
         
         # Initialize chat history
         self.chat_history = []
@@ -154,10 +244,9 @@ class ML_Assistant_Agent:
         self.override_context: bool = True
 
         
-        # Set up system message for ML assistance
-        system_message = SystemMessage(content="""You are an AI assistant specialized in machine learning code review and analysis. 
-        You help users understand, improve, and debug their ML code. Provide clear, actionable feedback and suggestions.""")
-        self.chat_history.append(system_message)
+        # Note: Some models don't support system messages, so we'll include the system prompt in user messages when needed
+        self.system_prompt = """You are an AI assistant specialized in machine learning code review and analysis. 
+        You help users understand, improve, and debug their ML code. Provide clear, actionable feedback and suggestions."""
 
     def set_problem_context(self, context: str):
         """
@@ -167,8 +256,6 @@ class ML_Assistant_Agent:
             context (str): Description of the problem domain.
         """
         self.problem_context = context
-        system_message = SystemMessage(content=f"Problem context: {context}")
-        self.chat_history.append(system_message)
     def set_data_description(self, description: str):
         """
         Set the data description for the agent.
@@ -177,8 +264,6 @@ class ML_Assistant_Agent:
             description (str): Description of the dataset.
         """
         self.data_description = description
-        system_message = SystemMessage(content=f"Data description: {description}")
-        self.chat_history.append(system_message)
 
     def ask(self, question: str) -> str:
         """
@@ -190,36 +275,69 @@ class ML_Assistant_Agent:
         Returns:
             str: The assistant's response (or error message).
         """
-        try:
-            question = question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
-            # Add user message to history
-            human_message = HumanMessage(content=question)
-            self.chat_history.append(human_message)
-            
-            # Get all messages for context
-            messages = self.chat_history
-            
-            # Invoke the model with full conversation history
-            response = self.llm.invoke(messages)
-            
-            # Add AI response to history
-            ai_message = AIMessage(content=response.content)
-            self.chat_history.append(ai_message)
-            
-            return response.content
+        # Check if LLM was initialized properly
+        if self.llm is None:
+            error_response = {
+                "error": True,
+                "message": "NVIDIA ChatLLM not initialized - check API key and connection",
+                "details": "The ChatNVIDIA client failed to initialize"
+            }
+            return json.dumps(error_response)
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # Prepend system prompt to the question for models that don't support system messages
+                full_question = f"{self.system_prompt}\n\n{question}"
+                
+                # Only add context if it's not already in the question
+                if "context of our problem" not in question and "data description" not in question:
+                    full_question = full_question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
+                
+                # Add user message to history
+                human_message = HumanMessage(content=full_question)
+                self.chat_history.append(human_message)
+                
+                # Filter out any system messages for models that don't support them
+                messages = [msg for msg in self.chat_history if not isinstance(msg, SystemMessage)]
+                
+                # Invoke the model with filtered conversation history
+                response = self.llm.invoke(messages)
+                
+                # Add AI response to history
+                ai_message = AIMessage(content=response.content)
+                self.chat_history.append(ai_message)
+                
+                # Clean and validate the response content
+                response_content = response.content
+                
+                # Check if response looks like it contains API metadata that needs cleaning
+                if response_content and isinstance(response_content, str):
+                    # Remove common NVIDIA API wrapper patterns
+                    if "'stream': False" in response_content or "'tool_choice': None" in response_content:
+                        response_content = clean_json_response(response_content)
+                
+                return response_content
 
-        except Exception as e:
-            print(f"Error in ask method: {e}")
-            return "Sorry, I couldn't process your request."
+            except Exception as e:
+                print(f"Error in ask method (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:  # Last attempt
+                    # Return a structured error response instead of raw error
+                    error_response = {
+                        "error": True,
+                        "message": f"AI request failed after {max_retries} attempts",
+                        "details": str(e)
+                    }
+                    return json.dumps(error_response)
+                # Wait before retry
+                import time
+                time.sleep(1)
 
     def clear_history(self):
         """
-        Reset the conversation history but keep the system message.
+        Reset the conversation history.
         """
         self.chat_history.clear()
-        system_message = SystemMessage(content="""You are an AI assistant specialized in machine learning code review and analysis. 
-        You help users understand, improve, and debug their ML code. Provide clear, actionable feedback and suggestions.""")
-        self.chat_history.append(system_message)
 
     def get_history(self) -> List[dict]:
         """
@@ -292,6 +410,9 @@ class ML_Assistant_Agent:
             dict: Content of the notebook as a dictionary
         """
         try:
+            if not os.path.exists(file_path):
+                return None
+                
             with open(file_path, 'r', encoding='utf-8') as f:
                 notebook = nbformat.read(f, as_version=4)
                 
@@ -313,7 +434,15 @@ class ML_Assistant_Agent:
         if not notebook_dict:
             return "Error: Invalid notebook data"
         
+        # Clear conversation history to avoid alternating role errors
+        self.clear_history()
+        
         notebook_string = safe_serialize(notebook_dict)
+        
+        # Truncate notebook string to fit within API limits (4096 tokens ≈ 3000 chars)
+        if len(notebook_string) > 3000:
+            notebook_string = notebook_string[:3000] + "... [truncated]"
+            
         analysis_parser = PydanticOutputParser(pydantic_object=AnalysisOutput)
         format_instructions = analysis_parser.get_format_instructions()
         # Use LangChain's parser
@@ -334,11 +463,11 @@ Focus on:
 6. Code organization and documentation suggestions
 7. Performance and scalability considerations
 
-Return ONLY the JSON response matching this schema exactly (no extra text or explanations):
+IMPORTANT: You must return ONLY valid JSON in the exact format specified below. Do not include any other text, explanations, or markdown formatting.
 
 {format_instructions}
 
-Example:
+Example of expected JSON format:
 {{
     "overall_assessment": "The code is well-structured but lacks proper data preprocessing.",
     "best_practices": "Use sklearn's StandardScaler for feature scaling.",
@@ -348,19 +477,49 @@ Example:
     "organization": "Separate data loading and preprocessing into functions.",
     "performance": "Optimize hyperparameters using grid search."
 }}
+
+Remember: Return ONLY the JSON object, nothing else.
 """
 
         )
         formatted_prompt = prompt.format(notebook_string=notebook_string, format_instructions=format_instructions)
         response = self.ask(formatted_prompt)
 
-
+        # Check if response is an error
         try:
-            parsed = analysis_parser.parse(response)
-            return parsed  # or jsonable_encoder(parsed) if you're returning via API
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return a fallback analysis
+                return AnalysisOutput(
+                    overall_assessment="AI service temporarily unavailable",
+                    best_practices=f"Error: {response_data.get('message', 'Unknown error')}",
+                    data_handling="Please try again later",
+                    model_implementation="",
+                    visualization="",
+                    organization="",
+                    performance=""
+                )
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        
+        try:
+            parsed = analysis_parser.parse(cleaned_response)
+            return parsed
         except Exception as e:
-            print("Parsing failed:", e)
-            return response
+            # Return a fallback analysis instead of raw error
+            return AnalysisOutput(
+                overall_assessment="Unable to parse AI response",
+                best_practices="The AI response could not be parsed",
+                data_handling="Please try again or check your notebook format",
+                model_implementation="",
+                visualization="",
+                organization="",
+                performance=""
+            )
         
 
     
@@ -395,9 +554,16 @@ Example:
         if not notebook_dict:
             return []
 
-         # Extract notebook context
-        old_notebook_string = "".join(self.notebook_history[:3])
+        # Clear conversation history to avoid alternating role errors
+        self.clear_history()
+
+         # Extract notebook context (truncate to fit API limits)
+        old_notebook_string = "".join(self.notebook_history[:1])  # Reduce history
         notebook_string = safe_serialize(notebook_dict)
+        
+        # Truncate notebook string to fit within API limits (4096 tokens ≈ 3000 chars)
+        if len(notebook_string) > 3000:
+            notebook_string = notebook_string[:3000] + "... [truncated]"
 
 
 
@@ -419,17 +585,25 @@ Focus on:
 2. Common visualization types for ML data
 3. Any specific libraries or tools to use (e.g., matplotlib, seaborn, plotly)
 
-You MUST respond with valid JSON using this structure (and only this structure):
+CRITICAL: You MUST respond with ONLY valid JSON. Do not include any other text, explanations, or markdown formatting.
 
 {format_instructions}
 
-Example:
+IMPORTANT: Your response must be a valid JSON object. Do not include any text before or after the JSON. The response should start with {{ and end with }}.
+
+Example of expected format:
 {{
   "visualizations": [
     {{
       "visualization_type": "scatter_plot",
       "description": "Scatter plot of feature vs target variable",
-      "why": "Useful for understanding relationships between features and target variable"    }}
+      "why": "Useful for understanding relationships between features and target variable"
+    }},
+    {{
+      "visualization_type": "histogram",
+      "description": "Distribution of target variable",
+      "why": "Shows the distribution and potential class imbalance"
+    }}
   ]
 }}
 """
@@ -439,13 +613,34 @@ Example:
             old_notebook_string=old_notebook_string
         )
         response = self.ask(formatted_prompt)
-
+        
+        # Check if response is an error
         try:
-            parsed = visualization_parser.parse(response)
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return a fallback visualization
+                return [VisualizationItem(
+                    visualization_type="error",
+                    description="AI service temporarily unavailable",
+                    why=f"Error: {response_data.get('message', 'Unknown error')}. Please try again later."
+                )]
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        
+        try:
+            parsed = visualization_parser.parse(cleaned_response)
             return parsed.visualizations  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
-            print("Parsing failed:", e)
-            return response
+            # Return a fallback visualization instead of raw error
+            return [VisualizationItem(
+                visualization_type="error",
+                description="Unable to parse AI response",
+                why="The AI response could not be parsed. Please try again or check your notebook format."
+            )]
 
 
     def get_suggestions(self, notebook_dict: dict) -> str:
@@ -461,10 +656,16 @@ Example:
         if not notebook_dict:
             return "Invalid notebook data"
 
+        # Clear conversation history to avoid alternating role errors
+        self.clear_history()
 
-        # Extract notebook context
-        old_notebook_string = "".join(self.notebook_history[:3])
+        # Extract notebook context (truncate to fit API limits)
+        old_notebook_string = "".join(self.notebook_history[:1])  # Reduce history
         notebook_string = safe_serialize(notebook_dict)
+        
+        # Truncate notebook string to fit within API limits (4096 tokens ≈ 3000 chars)
+        if len(notebook_string) > 3000:
+            notebook_string = notebook_string[:3000] + "... [truncated]"
 
 
 
@@ -489,10 +690,13 @@ Example:
         3. Data handling and preprocessing.
         4. Evaluation and tuning.
 
-        Only return a JSON object that matches this format:
+        CRITICAL: You MUST respond with ONLY valid JSON. Do not include any other text, explanations, or markdown formatting.
+
         {format_instructions}
-        I want you to return a JSON object with a list of suggestions and explanations. And only return the suggestions and explanations, no other text.
-        Example:
+
+        IMPORTANT: Your response must be a valid JSON object. Do not include any text before or after the JSON. The response should start with {{ and end with }}.
+
+        Example of expected format:
         {{
         "suggestions": [
             {{
@@ -514,15 +718,59 @@ Example:
         )
 
         response = self.ask(formatted_prompt)
-
-
-        print("Response from model:", response)
+        
+        # Check if response is an error
         try:
-            parsed = suggestion_parser.parse(response)
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return it as a fallback suggestion
+                return [{
+                    "suggestion": "AI service temporarily unavailable",
+                    "explanation": f"Error: {response_data.get('message', 'Unknown error')}. Please try again later."
+                }]
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        
+        # Additional validation for NVIDIA API responses
+        
+        try:
+            parsed = suggestion_parser.parse(cleaned_response)
             return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
-            print("Parsing failed:", e)
-            return response
+            
+            # Try alternative parsing strategies for NVIDIA API
+            try:
+                # Check if response contains valid JSON but in wrong format
+                if isinstance(response, str) and ('{' in response or '[' in response):
+                    # Try to extract and validate just the suggestions part
+                    if '"suggestions"' in response:
+                        # Extract suggestions array
+                        import re
+                        suggestions_match = re.search(r'"suggestions"\s*:\s*(\[.*?\])', response, re.DOTALL)
+                        if suggestions_match:
+                            suggestions_json = suggestions_match.group(1)
+                            suggestions_list = json.loads(suggestions_json)
+                            return suggestions_list
+                
+                # If the response looks like it contains suggestion content, extract it manually
+                if 'StandardScaler' in response or 'cross-validation' in response or 'feature' in response:
+                    return [{
+                        "suggestion": "Use ML best practices from AI response",
+                        "explanation": f"AI provided suggestions but in non-standard format: {response[:200]}..."
+                    }]
+                    
+            except Exception as parse_error:
+                pass  # Alternative parsing failed
+            
+            # Return a fallback suggestion instead of the raw error
+            return [{
+                "suggestion": "Unable to parse AI response",
+                "explanation": "The AI response could not be parsed. Please try again or check your notebook format."
+            }]
 
     def get_code(self, notebook_dict: dict, chosen_topic: str, chosen_option) -> str:
         """
@@ -541,6 +789,10 @@ Example:
             chosen_suggestion = chosen_option
             self.chosen_suggestion = chosen_suggestion
             self.notebook_history.append(safe_serialize(notebook_dict))
+        
+        # Clear chat history to avoid role alternation issues
+        self.clear_history()
+        
         # Extract relevant information from the notebook
         notebook_string = safe_serialize(notebook_dict)
 
@@ -558,16 +810,19 @@ Example:
         1. The topic the user chose: {chosen_topic}
         2. The option the user chose: {chosen_option}
         3. The current notebook data
-        You are an agent that return in JSON format of code in the following format and no other text:
+
+        CRITICAL: You MUST respond with ONLY valid JSON. Do not include any other text, explanations, or markdown formatting.
+
         {format_instructions}
-        example:
-            Provide specific Python code examples using sklearn, pandas, or numpy.
-            return response in JSON format example:
-            {{
-                "code": "import pandas as pd\\n\\ndata = pd.read_csv('data.csv')",
-                "explanation": "This code loads the dataset into a pandas DataFrame for analysis.",
-                "cell_block": "1"  # Assuming this is the first cell in the notebook
-            }}
+
+        IMPORTANT: Your response must be a valid JSON object. Do not include any text before or after the JSON. The response should start with {{ and end with }}.
+
+        Example of expected format:
+        {{
+            "code": "import pandas as pd\\n\\ndata = pd.read_csv('data.csv')",
+            "explanation": "This code loads the dataset into a pandas DataFrame for analysis.",
+            "cell_block": "1"
+        }}
         """
         )
         formatted_prompt = prompt.format(
@@ -577,12 +832,34 @@ Example:
             format_instructions=format_instructions
         )
         response = self.ask(formatted_prompt)
+        
+        # Check if response is an error
         try:
-            parsed = code_parser.parse(response)
+            response_data = json.loads(response)
+            if response_data.get("error"):
+                # This is an error response, return a fallback code output
+                return CodeOutput(
+                    code="# AI service temporarily unavailable\n# Please try again later",
+                    explanation=f"Error: {response_data.get('message', 'Unknown error')}",
+                    cell_block="error"
+                )
+        except (json.JSONDecodeError, TypeError):
+            # Not a JSON error response, proceed with normal parsing
+            pass
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        
+        try:
+            parsed = code_parser.parse(cleaned_response)
             return parsed  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
-            print("Parsing failed:", e)
-            return response
+            # Return a fallback code output instead of raw error
+            return CodeOutput(
+                code="# Unable to parse AI response\n# Please try again or check your notebook format",
+                explanation="The AI response could not be parsed",
+                cell_block="error"
+            )
         
     def chat(self, question: str) -> str:
         """
@@ -595,6 +872,9 @@ Example:
             str: The assistant's response (or error message).
         """
         try:
+            # Clear chat history to avoid role alternation issues
+            self.clear_history()
+            
             old_notebook_string = "".join(self.notebook_history[:3])
             notebook_dict = self.read_notebook(self.current_notebook)
 

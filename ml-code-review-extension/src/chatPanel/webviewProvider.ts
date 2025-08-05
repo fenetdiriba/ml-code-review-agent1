@@ -38,6 +38,15 @@ export class WebviewProvider {
     }
   }
 
+  public updateMessagesOnly(messages: ChatMessage[]): void {
+    if (this.panel) {
+      this.panel.webview.postMessage({
+        type: 'updateMessages',
+        data: messages
+      });
+    }
+  }
+
   public updateNotebookConnectionDisplay(): void {
     if (!this.panel) return;
     
@@ -878,6 +887,7 @@ export class WebviewProvider {
         // Listen for backend responses and notebook connection updates
         window.addEventListener('message', function(event) {
             const message = event.data;
+            console.log('📥 Webview received message:', message.type, message.data);
             
             if (message.type === 'updateNotebookConnection') {
                 const connectionElement = document.getElementById('notebookConnection');
@@ -888,6 +898,7 @@ export class WebviewProvider {
             }
             
             else if (message.type === 'suggestionsReceived') {
+                console.log('📥 Webview received suggestions:', message.data);
                 displaySuggestions(message.data);
             }
             else if (message.type === 'suggestionsError') {
@@ -916,20 +927,33 @@ export class WebviewProvider {
             else if (message.type === 'codeGenerationError') {
                 displayCodeGenerationError(message.data.error);
             }
+            else if (message.type === 'updateMessages') {
+                updateMessagesDisplay(message.data);
+            }
         });
 
         function displaySuggestions(suggestions) {
-            console.log('Displaying suggestions:', suggestions);
+            console.log('🎨 displaySuggestions called with:', suggestions);
             const suggestionsContent = document.getElementById('suggestionsContent');
-            if (!suggestionsContent) return;
+            if (!suggestionsContent) {
+                console.error('❌ suggestionsContent element not found');
+                return;
+            }
 
-            if (!suggestions || suggestions.length === 0) {
+            // Handle both direct array and {suggestions: [...]} format
+            const suggestionsArray = suggestions.suggestions || suggestions;
+            console.log('📋 Processed suggestions array:', suggestionsArray);
+            
+            if (!suggestionsArray || suggestionsArray.length === 0) {
+                console.log('⚠️ No suggestions available');
                 suggestionsContent.innerHTML = '<div class="upload-prompt"><p>💡 No suggestions available. Try uploading a notebook first.</p></div>';
                 return;
             }
 
+            console.log('🔨 Building HTML for', suggestionsArray.length, 'suggestions');
             let html = '';
-            suggestions.forEach((sug, index) => {
+            suggestionsArray.forEach((sug, index) => {
+                console.log('📝 Processing suggestion', index, ':', sug);
                 html += \`
                     <div class="suggestion-item" onclick="selectSuggestion(\${index}, \${JSON.stringify(sug).replace(/"/g, '&quot;')})">
                         <div class="suggestion-title">\${sug.suggestion || 'Suggestion ' + (index + 1)}</div>
@@ -937,7 +961,9 @@ export class WebviewProvider {
                     </div>
                 \`;
             });
+            console.log('🎯 Setting innerHTML with length:', html.length);
             suggestionsContent.innerHTML = html;
+            console.log('✅ Suggestions displayed successfully');
         }
 
         function displaySuggestionsError(error) {
@@ -951,16 +977,19 @@ export class WebviewProvider {
             const visualizeContent = document.getElementById('visualizeContent');
             if (!visualizeContent) return;
 
-            if (!visualizations || !visualizations.visualizations || visualizations.visualizations.length === 0) {
+            // Handle both direct array and {visualizations: [...]} format
+            const visualizationsArray = visualizations.visualizations || visualizations;
+            
+            if (!visualizationsArray || visualizationsArray.length === 0) {
                 visualizeContent.innerHTML = '<div class="upload-prompt"><p>📊 No visualizations available. Try uploading a notebook first.</p></div>';
                 return;
             }
 
             let html = '';
-            visualizations.visualizations.forEach((viz, index) => {
+            visualizationsArray.forEach((viz, index) => {
                 html += \`
                     <div class="visualization-item" onclick="selectVisualization(\${index}, \${JSON.stringify(viz).replace(/"/g, '&quot;')})">
-                        <div class="visualization-title">\${viz.title || 'Visualization ' + (index + 1)}</div>
+                        <div class="visualization-title">\${viz.visualization_type || viz.title || 'Visualization ' + (index + 1)}</div>
                         <div class="visualization-description">\${viz.description || viz.explanation || 'No description available'}</div>
                     </div>
                 \`;
@@ -979,7 +1008,18 @@ export class WebviewProvider {
             const analyzeContent = document.getElementById('analyzeContent');
             if (!analyzeContent) return;
 
-            if (!analysis || !analysis.analysis) {
+            console.log('🔍 displayAnalysis called with:', analysis);
+
+            if (!analysis) {
+                analyzeContent.innerHTML = '<div class="upload-prompt"><p>🔍 No analysis available. Please upload a notebook using the button above.</p></div>';
+                return;
+            }
+
+            // Handle both direct object and {analysis: {...}} format
+            const analysisData = analysis.analysis || analysis;
+            console.log('📊 Processed analysis data:', analysisData);
+
+            if (!analysisData || (typeof analysisData === 'object' && Object.keys(analysisData).length === 0)) {
                 analyzeContent.innerHTML = '<div class="upload-prompt"><p>🔍 No analysis available. Please upload a notebook using the button above.</p></div>';
                 return;
             }
@@ -988,11 +1028,31 @@ export class WebviewProvider {
                 <div class="analysis-report">
                     <h4>📊 Detailed Analysis Report</h4>
                     <div class="analysis-content">
-                        \${typeof analysis.analysis === 'string' ? analysis.analysis.replace(/\\n/g, '<br>') : JSON.stringify(analysis.analysis, null, 2)}
+            \`;
+
+            if (typeof analysisData === 'string') {
+                html += analysisData.replace(/\\n/g, '<br>');
+            } else if (typeof analysisData === 'object') {
+                // Handle structured analysis object
+                Object.entries(analysisData).forEach(([key, value]) => {
+                    if (value && value !== '') {
+                        const formattedKey = key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
+                        html += \`
+                            <div class="analysis-section">
+                                <h5>\${formattedKey}</h5>
+                                <p>\${value}</p>
+                            </div>
+                        \`;
+                    }
+                });
+            }
+
+            html += \`
                     </div>
                 </div>
             \`;
             analyzeContent.innerHTML = html;
+            console.log('✅ Analysis displayed successfully');
         }
 
         function displayAnalysisError(error) {
@@ -1056,6 +1116,19 @@ export class WebviewProvider {
                 type: 'generateCode',
                 data: { suggestion: visualization, type: 'visualization' }
             });
+        }
+
+        function updateMessagesDisplay(messages) {
+            const messagesContainer = document.getElementById('messages');
+            if (messagesContainer) {
+                const messagesHtml = messages.map(msg => \`
+                    <div class="message \${msg.role}">
+                        <div class="message-avatar">\${msg.role === 'user' ? 'U' : 'AI'}</div>
+                        <div class="message-content">\${msg.content}</div>
+                    </div>
+                \`).join('');
+                messagesContainer.innerHTML = messagesHtml;
+            }
         }
 
         function displayGeneratedCode(codeData) {

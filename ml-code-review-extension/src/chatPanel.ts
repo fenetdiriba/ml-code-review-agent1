@@ -34,10 +34,18 @@ export class ChatPanel {
     this.webviewProvider = new WebviewProvider(this.notebookAnalyzer);
   }
 
-  public show() {
+  public async show() {
     this.webviewProvider.show();
     this.setupWebviewMessageHandling();
     this.updateWebview();
+    
+    // Auto-upload active notebook if available
+    await this.uploadActiveNotebook();
+    
+    // Small delay to ensure webview is ready
+    setTimeout(() => {
+      console.log('🔄 Webview should be ready now');
+    }, 1000);
   }
 
   private setupWebviewMessageHandling() {
@@ -48,11 +56,11 @@ export class ChatPanel {
       switch (message.type) {
         case 'sendMessage':
           await this.messageHandler.handleUserMessage(message.content);
-          this.updateWebview();
+          this.updateMessagesOnly();
           break;
         case 'clearChat':
           this.messageHandler.clearMessages();
-          this.updateWebview();
+          this.updateMessagesOnly();
           break;
         case 'uploadFile':
           await this.fileUploadHandler.handleUploadFile();
@@ -126,35 +134,63 @@ export class ChatPanel {
     this.webviewProvider.updateWebview(this.messageHandler.getMessages());
   }
 
+  private updateMessagesOnly() {
+    this.webviewProvider.updateMessagesOnly(this.messageHandler.getMessages());
+  }
+
   private updateNotebookConnectionDisplay() {
     this.webviewProvider.updateNotebookConnectionDisplay();
   }
 
-  private async handleGetSuggestions() {
-    const panel = this.webviewProvider.getPanel();
-    if (!panel) return;
-
+  private async uploadActiveNotebook(): Promise<boolean> {
     try {
-      // send o
       let active_notebook_url = this.notebookMonitor.getActiveNotebook()?.uri.toString();
       
       if (active_notebook_url) {
-        //remove 'file://' prefix if present
+        console.log('Uploading active notebook:', active_notebook_url);
+        // Convert file:// URL to actual file path if needed
+        let uploadPath = active_notebook_url;
         if (active_notebook_url.startsWith('file://')) {
-          active_notebook_url = active_notebook_url.substring(7);
+          uploadPath = decodeURIComponent(active_notebook_url.replace('file://', ''));
         }
         // Upload the active notebook file to the backend
-        let response = await this.api.uploadFile(active_notebook_url);
+        let response = await this.api.uploadFile(uploadPath);
+        console.log('Notebook upload successful:', response);
+        return true;
       }
+      return false;
+    } catch (error) {
+      console.error('Notebook upload failed:', error);
+      return false;
+    }
+  }
+
+  private async handleGetSuggestions() {
+    console.log('🔄 handleGetSuggestions called');
+    const panel = this.webviewProvider.getPanel();
+    if (!panel) {
+      console.error('❌ No webview panel available');
+      return;
+    }
+
+    try {
+      console.log('📤 Uploading active notebook...');
+      // Upload active notebook first
+      await this.uploadActiveNotebook();
       
+      console.log('📡 Getting suggestions from backend...');
       const response = await this.api.getSuggestions();
+      console.log('✅ Got suggestions response:', response);
   
+      console.log('📤 Sending suggestions to webview...');
+      console.log('📤 Message data:', response);
       panel.webview.postMessage({
         type: 'suggestionsReceived',
         data: response
       });
+      console.log('✅ Suggestions sent to webview');
     } catch (error) {
-      console.error('Error getting suggestions:', error);
+      console.error('❌ Error getting suggestions:', error);
       panel.webview.postMessage({
         type: 'suggestionsError',
         data: { error: error instanceof Error ? error.message : 'Unknown error' }
@@ -167,6 +203,9 @@ export class ChatPanel {
     if (!panel) return;
 
     try {
+      // Upload active notebook first
+      await this.uploadActiveNotebook();
+
       const visualizations = await this.api.getVisualizations();
       panel.webview.postMessage({
         type: 'visualizationsReceived',
@@ -186,11 +225,16 @@ export class ChatPanel {
     if (!panel) return;
 
     try {
+      // Upload active notebook first
+      await this.uploadActiveNotebook();
+
       const analysis = await this.api.getAnalysis();
+      console.log('📤 Sending analysis to webview:', analysis);
       panel.webview.postMessage({
         type: 'analysisReceived',
         data: analysis
       });
+      console.log('✅ Analysis sent to webview');
     } catch (error) {
       console.error('Error getting analysis:', error);
       panel.webview.postMessage({

@@ -20,34 +20,101 @@ def test_health():
         return False
 
 def test_upload():
-      file_path = "/Users/jiahuajiang/Desktop/Code/Nvidia-agent/2_Linear_Regression_Housing.ipynb"
-      with open(file_path, 'rb') as f:
-          files = {'file': (file_path, f, 'application/json')}
-          response = requests.post(f"{BASE_URL}/upload", files=files)
+    """Test file upload endpoint"""
+    print("Testing /upload endpoint...")
+    try:
+        file_path = "/Users/josephsackitey/Desktop/Nvidia-agent/ml-code-review-extension/temp_uploads/2_Linear_Regression_Housing.ipynb"
+        with open(file_path, 'rb') as f:
+            files = {'file': (file_path, f, 'application/json')}
+            response = requests.post(f"{BASE_URL}/upload", files=files)
+            print(f"Upload Status: {response.status_code}")
+            print(f"Upload Response: {response.json()}")
+            return response.status_code == 200
+    except Exception as e:
+        print(f"Upload Error: {e}")
+        return False
+
 def test_analyze():
-    notebook_analysis = requests.get(f"{BASE_URL}/analyze")
-    print(notebook_analysis.json())
+    """Test analyze endpoint"""
+    print("\nTesting /analyze endpoint...")
+    try:
+        notebook_analysis = requests.get(f"{BASE_URL}/analyze")
+        print(f"Analyze Status: {notebook_analysis.status_code}")
+        print(f"Analyze Response: {notebook_analysis.json()}")
+        return notebook_analysis.status_code == 200
+    except Exception as e:
+        print(f"Analyze Error: {e}")
+        return False
+
 def test_visualization():
-    visualization_response = requests.get(f"{BASE_URL}/visualize")
-    print(visualization_response.json())
+    """Test visualization endpoint"""
+    print("\nTesting /visualize endpoint...")
+    try:
+        visualization_response = requests.get(f"{BASE_URL}/visualize")
+        print(f"Visualize Status: {visualization_response.status_code}")
+        print(f"Visualize Response: {visualization_response.json()}")
+        return visualization_response.status_code == 200
+    except Exception as e:
+        print(f"Visualize Error: {e}")
+        return False
 
 def test_suggestions():
-    suggestions_response = requests.get(f"{BASE_URL}/suggestions")
-    print(suggestions_response.json())
+    """Test suggestions endpoint"""
+    print("\nTesting /suggestions endpoint...")
+    try:
+        suggestions_response = requests.get(f"{BASE_URL}/suggestions")
+        print(f"Suggestions Status: {suggestions_response.status_code}")
+        print(f"Suggestions Response: {suggestions_response.json()}")
+        return suggestions_response.status_code == 200
+    except Exception as e:
+        print(f"Suggestions Error: {e}")
+        return False
 
 def test_code():
-    code_response = requests.get(f"{BASE_URL}/code?topic=suggestion&option=add_data_cleaning")
-    print(code_response.json())
-def test_chat():
-    chat_response = requests.get(f"{BASE_URL}/chat", json={"question": "What is the purpose of this notebook?"})
-    print(chat_response.json())
-def main():
-    test_upload()
+    """Test code generation endpoint"""
+    print("\nTesting /code endpoint...")
+    try:
+        code_response = requests.get(f"{BASE_URL}/code?topic=suggestion&option=add_data_cleaning")
+        print(f"Code Status: {code_response.status_code}")
+        print(f"Code Response: {code_response.json()}")
+        return code_response.status_code == 200
+    except Exception as e:
+        print(f"Code Error: {e}")
+        return False
 
+def test_chat():
+    """Test chat endpoint"""
+    print("\nTesting /chat endpoint...")
+    try:
+        chat_response = requests.get(f"{BASE_URL}/chat?question=What is the purpose of this notebook?")
+        print(f"Chat Status: {chat_response.status_code}")
+        print(f"Chat Response: {chat_response.json()}")
+        return chat_response.status_code == 200
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        return False
+
+def main():
+    """Run all endpoint tests"""
+    print("=== API Endpoint Testing ===")
+    
+    # Test health first
+    if not test_health():
+        print("❌ Health check failed - server may not be running")
+        return
+    
+    # Test upload
+    if not test_upload():
+        print("❌ Upload failed - subsequent tests may fail")
+        return
+    
+    # Test other endpoints
     test_analyze()
     test_visualization()
     test_suggestions()
     test_code()
     test_chat()
+    
+    print("\n=== Testing Complete ===")
 if __name__ == "__main__":
     main()

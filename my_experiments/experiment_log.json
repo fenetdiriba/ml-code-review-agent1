@@ -1,0 +1,22 @@
+{
+  "experiments": {
+    "20250729_222634_ML_Model_Comparison": {
+      "id": "20250729_222634_ML_Model_Comparison",
+      "name": "ML Model Comparison",
+      "description": "Comparing different classification algorithms",
+      "tags": [
+        "classification",
+        "comparison",
+        "ml"
+      ],
+      "created": "2025-07-29T22:26:34.201391",
+      "status": "active",
+      "base_notebook": null,
+      "notebooks": [],
+      "analysis_results": [],
+      "notes": []
+    }
+  },
+  "created": "2025-07-29T22:26:34.201024",
+  "last_updated": "2025-07-29T22:26:34.201483"
+}
