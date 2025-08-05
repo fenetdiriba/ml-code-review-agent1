@@ -139,12 +139,17 @@ export class ChatPanel {
       let active_notebook_url = this.notebookMonitor.getActiveNotebook()?.uri.toString();
       
       if (active_notebook_url) {
-        //remove 'file://' prefix if present
+        console.log('Original active_notebook_url:', active_notebook_url);
+        // Convert file:// URL to actual file path if needed
+        let uploadPath = active_notebook_url;
         if (active_notebook_url.startsWith('file://')) {
-          active_notebook_url = active_notebook_url.substring(7);
+          uploadPath = decodeURIComponent(active_notebook_url.replace('file://', ''));
+          console.log('Converted file URL to path for upload:', uploadPath);
         }
         // Upload the active notebook file to the backend
-        let response = await this.api.uploadFile(active_notebook_url);
+        console.log('Attempting upload with path:', uploadPath);
+        let response = await this.api.uploadFile(uploadPath);
+        console.log('Upload response:', response);
       }
       
       const response = await this.api.getSuggestions();

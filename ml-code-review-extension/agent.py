@@ -66,10 +66,10 @@ class NvidiaLlamaAgent:
         
         # Initialize the LangChain NVIDIA chat model
         self.llm = ChatNVIDIA(
-            model="meta/llama-3.1-8b-instruct",
+            model="ai-llama-3_1-8b-instruct",  # Use the correct model name from the available list
             api_key=api_key,
-            temperature=0.7,
-            max_tokens=512
+            temperature=0.3,
+            max_tokens=1024
         )
         
         # Initialize chat history
@@ -77,9 +77,9 @@ class NvidiaLlamaAgent:
 
     def chat(self,
              message: str,
-             model: str = "meta/llama-3.1-8b-instruct",
-             max_tokens: int = 512,
-             temperature: float = 0.7) -> Optional[str]:
+             model: str = "ai-llama-3_1-8b-instruct",
+             max_tokens: int = 1024,
+             temperature: float = 0.3) -> Optional[str]:
         """
         Send a single chat message and receive a response.
 
@@ -94,7 +94,7 @@ class NvidiaLlamaAgent:
         """
         try:
             # Update model parameters if different from defaults
-            if model != "meta/llama-3.1-8b-instruct" or max_tokens != 512 or temperature != 0.7:
+            if model != "ai-llama-3_1-8b-instruct" or max_tokens != 1024 or temperature != 0.3:
                 self.llm = ChatNVIDIA(
                     model=model,
                     api_key=self.api_key,
@@ -119,6 +119,36 @@ def safe_serialize(obj):
             return str(o)  # or `repr(o)` if needed
         return json.dumps(obj, indent=2, default=convert)
 
+def validate_json_response(response: str) -> bool:
+    """Validate if a response is valid JSON"""
+    try:
+        json.loads(response)
+        return True
+    except (json.JSONDecodeError, TypeError):
+        return False
+
+def clean_json_response(response: str) -> str:
+    """Clean and fix malformed JSON responses"""
+    try:
+        # Try to parse as-is first
+        json.loads(response)
+        return response
+    except json.JSONDecodeError:
+        # Try to extract JSON from the response
+        import re
+        
+        # Look for JSON-like content between curly braces
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
+        if json_match:
+            try:
+                json.loads(json_match.group())
+                return json_match.group()
+            except json.JSONDecodeError:
+                pass
+        
+        # If no valid JSON found, return a fallback
+        return response
+
 class ML_Assistant_Agent:
     """
     Higher-level agent that preserves conversation history
@@ -136,10 +166,10 @@ class ML_Assistant_Agent:
         
         # Initialize the LangChain NVIDIA chat model
         self.llm = ChatNVIDIA(
-            model="meta/llama-3.1-8b-instruct",
+            model="ai-llama-3_1-8b-instruct",  # Use the correct model name from the available list
             api_key=api_key,
-            temperature=0.7,
-            max_tokens=512
+            temperature=0.3,  # Lower temperature for more consistent JSON output
+            max_tokens=1024   # Maximum allowed token limit for ChatNVIDIA
         )
         
         # Initialize chat history
@@ -190,27 +220,33 @@ class ML_Assistant_Agent:
         Returns:
             str: The assistant's response (or error message).
         """
-        try:
-            question = question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
-            # Add user message to history
-            human_message = HumanMessage(content=question)
-            self.chat_history.append(human_message)
-            
-            # Get all messages for context
-            messages = self.chat_history
-            
-            # Invoke the model with full conversation history
-            response = self.llm.invoke(messages)
-            
-            # Add AI response to history
-            ai_message = AIMessage(content=response.content)
-            self.chat_history.append(ai_message)
-            
-            return response.content
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                question = question + f" The context of our problem is: {self.problem_context} and our data description is: {self.data_description}"
+                # Add user message to history
+                human_message = HumanMessage(content=question)
+                self.chat_history.append(human_message)
+                
+                # Get all messages for context
+                messages = self.chat_history
+                
+                # Invoke the model with full conversation history
+                response = self.llm.invoke(messages)
+                
+                # Add AI response to history
+                ai_message = AIMessage(content=response.content)
+                self.chat_history.append(ai_message)
+                
+                return response.content
 
-        except Exception as e:
-            print(f"Error in ask method: {e}")
-            return "Sorry, I couldn't process your request."
+            except Exception as e:
+                print(f"Error in ask method (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:  # Last attempt
+                    return f"AI request failed after {max_retries} attempts. Error: {str(e)}"
+                # Wait before retry
+                import time
+                time.sleep(1)
 
     def clear_history(self):
         """
@@ -292,9 +328,15 @@ class ML_Assistant_Agent:
             dict: Content of the notebook as a dictionary
         """
         try:
+            print(f"Attempting to read notebook from: {file_path}")
+            if not os.path.exists(file_path):
+                print(f"File does not exist: {file_path}")
+                return None
+                
             with open(file_path, 'r', encoding='utf-8') as f:
                 notebook = nbformat.read(f, as_version=4)
                 
+            print(f"Successfully read notebook with {len(notebook.get('cells', []))} cells")
             return notebook
         except Exception as e:
             print(f"Error reading notebook: {e}")
@@ -334,11 +376,11 @@ Focus on:
 6. Code organization and documentation suggestions
 7. Performance and scalability considerations
 
-Return ONLY the JSON response matching this schema exactly (no extra text or explanations):
+IMPORTANT: You must return ONLY valid JSON in the exact format specified below. Do not include any other text, explanations, or markdown formatting.
 
 {format_instructions}
 
-Example:
+Example of expected JSON format:
 {{
     "overall_assessment": "The code is well-structured but lacks proper data preprocessing.",
     "best_practices": "Use sklearn's StandardScaler for feature scaling.",
@@ -348,18 +390,27 @@ Example:
     "organization": "Separate data loading and preprocessing into functions.",
     "performance": "Optimize hyperparameters using grid search."
 }}
+
+Remember: Return ONLY the JSON object, nothing else.
 """
 
         )
         formatted_prompt = prompt.format(notebook_string=notebook_string, format_instructions=format_instructions)
         response = self.ask(formatted_prompt)
 
-
+        print("Analysis response from model:", response)
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        print("Cleaned analysis response:", cleaned_response)
+        
         try:
-            parsed = analysis_parser.parse(response)
+            parsed = analysis_parser.parse(cleaned_response)
             return parsed  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
-            print("Parsing failed:", e)
+            print("Analysis parsing failed:", e)
+            print("Original response:", response)
+            print("Cleaned response:", cleaned_response)
             return response
         
 
@@ -419,17 +470,25 @@ Focus on:
 2. Common visualization types for ML data
 3. Any specific libraries or tools to use (e.g., matplotlib, seaborn, plotly)
 
-You MUST respond with valid JSON using this structure (and only this structure):
+CRITICAL: You MUST respond with ONLY valid JSON. Do not include any other text, explanations, or markdown formatting.
 
 {format_instructions}
 
-Example:
+IMPORTANT: Your response must be a valid JSON object. Do not include any text before or after the JSON. The response should start with {{ and end with }}.
+
+Example of expected format:
 {{
   "visualizations": [
     {{
       "visualization_type": "scatter_plot",
       "description": "Scatter plot of feature vs target variable",
-      "why": "Useful for understanding relationships between features and target variable"    }}
+      "why": "Useful for understanding relationships between features and target variable"
+    }},
+    {{
+      "visualization_type": "histogram",
+      "description": "Distribution of target variable",
+      "why": "Shows the distribution and potential class imbalance"
+    }}
   ]
 }}
 """
@@ -440,11 +499,19 @@ Example:
         )
         response = self.ask(formatted_prompt)
 
+        print("Visualization response from model:", response)
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        print("Cleaned visualization response:", cleaned_response)
+        
         try:
-            parsed = visualization_parser.parse(response)
+            parsed = visualization_parser.parse(cleaned_response)
             return parsed.visualizations  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
-            print("Parsing failed:", e)
+            print("Visualization parsing failed:", e)
+            print("Original response:", response)
+            print("Cleaned response:", cleaned_response)
             return response
 
 
@@ -489,10 +556,13 @@ Example:
         3. Data handling and preprocessing.
         4. Evaluation and tuning.
 
-        Only return a JSON object that matches this format:
+        CRITICAL: You MUST respond with ONLY valid JSON. Do not include any other text, explanations, or markdown formatting.
+
         {format_instructions}
-        I want you to return a JSON object with a list of suggestions and explanations. And only return the suggestions and explanations, no other text.
-        Example:
+
+        IMPORTANT: Your response must be a valid JSON object. Do not include any text before or after the JSON. The response should start with {{ and end with }}.
+
+        Example of expected format:
         {{
         "suggestions": [
             {{
@@ -515,13 +585,19 @@ Example:
 
         response = self.ask(formatted_prompt)
 
-
         print("Response from model:", response)
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        print("Cleaned response:", cleaned_response)
+        
         try:
-            parsed = suggestion_parser.parse(response)
+            parsed = suggestion_parser.parse(cleaned_response)
             return parsed.suggestions  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
             print("Parsing failed:", e)
+            print("Original response:", response)
+            print("Cleaned response:", cleaned_response)
             return response
 
     def get_code(self, notebook_dict: dict, chosen_topic: str, chosen_option) -> str:
@@ -558,16 +634,19 @@ Example:
         1. The topic the user chose: {chosen_topic}
         2. The option the user chose: {chosen_option}
         3. The current notebook data
-        You are an agent that return in JSON format of code in the following format and no other text:
+
+        CRITICAL: You MUST respond with ONLY valid JSON. Do not include any other text, explanations, or markdown formatting.
+
         {format_instructions}
-        example:
-            Provide specific Python code examples using sklearn, pandas, or numpy.
-            return response in JSON format example:
-            {{
-                "code": "import pandas as pd\\n\\ndata = pd.read_csv('data.csv')",
-                "explanation": "This code loads the dataset into a pandas DataFrame for analysis.",
-                "cell_block": "1"  # Assuming this is the first cell in the notebook
-            }}
+
+        IMPORTANT: Your response must be a valid JSON object. Do not include any text before or after the JSON. The response should start with {{ and end with }}.
+
+        Example of expected format:
+        {{
+            "code": "import pandas as pd\\n\\ndata = pd.read_csv('data.csv')",
+            "explanation": "This code loads the dataset into a pandas DataFrame for analysis.",
+            "cell_block": "1"
+        }}
         """
         )
         formatted_prompt = prompt.format(
@@ -577,11 +656,20 @@ Example:
             format_instructions=format_instructions
         )
         response = self.ask(formatted_prompt)
+        
+        print("Code generation response from model:", response)
+        
+        # Clean the response before parsing
+        cleaned_response = clean_json_response(response)
+        print("Cleaned code response:", cleaned_response)
+        
         try:
-            parsed = code_parser.parse(response)
+            parsed = code_parser.parse(cleaned_response)
             return parsed  # or jsonable_encoder(parsed) if you're returning via API
         except Exception as e:
-            print("Parsing failed:", e)
+            print("Code parsing failed:", e)
+            print("Original response:", response)
+            print("Cleaned response:", cleaned_response)
             return response
         
     def chat(self, question: str) -> str:

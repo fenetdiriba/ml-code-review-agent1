@@ -54,7 +54,15 @@ export class MessageHandler {
       
       let errorText = 'Sorry, I encountered an error. Please try again.';
       if (error?.code === 'ECONNREFUSED') {
-        errorText = 'Cannot connect to backend server. Make sure app.py is running on port 8000.';
+        errorText = 'Cannot connect to backend server. Make sure the backend is running on port 3000.';
+      } else if (error?.message?.includes('HTTP 400')) {
+        errorText = 'No notebook uploaded. Please upload a notebook first.';
+      } else if (error?.message?.includes('HTTP 500')) {
+        errorText = 'Backend processing error. Please try again or check the backend logs.';
+      } else if (error?.message?.includes('timeout')) {
+        errorText = 'Request timed out. The backend may be processing a large file. Please try again.';
+      } else if (error?.message?.includes('socket hang up')) {
+        errorText = 'Connection lost. Please check your network connection and try again.';
       } else if (error?.message) {
         errorText = `Error: ${error.message}`;
       }
