@@ -1,6 +1,6 @@
 # Security Guidelines
 
-## API Key Management
+## API Key Management 
 
 ### ⚠️ IMPORTANT: Never commit API keys to version control!
 
