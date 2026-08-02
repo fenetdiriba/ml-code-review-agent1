@@ -245,5 +245,4 @@ if __name__ == '__main__':
     print(f"API Key configured: {api_key is not None}")
     print(f"Agent initialized: {agent is not None}")
     print(f"Debug mode: {debug_mode}")
-    app.run(host='0.0.0.0', port=3000, debug=debug_mode) {agent is not None}")
-    app.run(host='0.0.0.0', port=3000, debug=True) 
+    app.run(host='0.0.0.0', port=3000, debug=debug_mode)
