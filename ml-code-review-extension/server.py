@@ -240,7 +240,10 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     print("Starting ML Code Review Backend Server...")
     print(f"API Key configured: {api_key is not None}")
     print(f"Agent initialized: {agent is not None}")
+    print(f"Debug mode: {debug_mode}")
+    app.run(host='0.0.0.0', port=3000, debug=debug_mode) {agent is not None}")
     app.run(host='0.0.0.0', port=3000, debug=True) 
