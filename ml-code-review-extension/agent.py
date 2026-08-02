@@ -24,7 +24,7 @@ class SuggestionItem(BaseModel):
     suggestion: str
     explanation: str
 
-# Define the overall return schema as a list of suggestions
+# Define the overall return schema as a list of suggestions 
 class SuggestionsOutput(BaseModel):
     suggestions: List[SuggestionItem]
 
