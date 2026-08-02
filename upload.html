@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ML Code Review Buddy — Upload Test</title>
+  </head>
   <body>
     <h1>Upload Notebook</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <input type="file" name="notebook" accept=".ipynb" required />
+    <p>Simple test page for the <code>/upload</code> endpoint (see <code>server.py</code>).</p>
+    <form action="http://localhost:3000/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".ipynb" required />
       <button type="submit">Send to Server</button>
     </form>
   </body>
 </html>
+ 
