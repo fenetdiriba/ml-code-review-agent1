@@ -6,7 +6,7 @@
   "publisher": "nvidia-agent",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2guud4u/Nvidia-agent.git"
+    "url": "https://github.com/fenetdiriba/ml-code-review-agent1.git"
   },
   "engines": {
     "vscode": "^1.74.0"
